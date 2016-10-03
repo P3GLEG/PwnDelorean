@@ -1,85 +1,142 @@
-#include "../libgit2/include/git2.h"
-#include "../libgit2/include/git2/clone.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+extern "C" {
+    #include "../libgit2/include/git2.h"
+    #include "../libgit2/include/git2/clone.h"
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+
+}
 #ifndef _WIN32
-# include <pthread.h>
-# include <unistd.h>
+    # include <pthread.h>
+    # include <unistd.h>
 #endif
 #include <iostream>
+#include <queue>
+#include <unordered_map>
+#include <string>
+
+#define OUTPUT_DIR "/tmp/yay/"
+#define REPO OUTPUT_DIR ".git"
+
+using namespace std;
+
+
 
 void printGitError(){
     printf("ERROR: %s\n", giterr_last()->message);
 }
 
-void cloneRepo(git_repository** repo){
+static void print_signature(const char *header, const git_signature *sig)
+{
+    char sign;
+    int offset, hours, minutes;
 
+    if (!sig)
+        return;
 
-}
-
-void getAllFiles(git_repository* repo){
-  int error = 0;
-  git_revwalk *walk;
-  git_commit *wcommit = NULL;
-  git_oid oid;
-  const git_signature *cauth;
-  const char *cmsg;
-  git_revwalk_new(&walk, repo);
-  git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL | GIT_SORT_REVERSE);
-  while ((git_revwalk_next(&oid, walk)) == 0) {
-	  error = git_commit_lookup(&wcommit, repo, &oid);
-	  printGitError();
-	  cmsg  = git_commit_message(wcommit);
-	  cauth = git_commit_author(wcommit);
-	  printf("%s (%s)\n", cmsg, cauth->email);
-	  git_commit_free(wcommit);
-  }
-  git_revwalk_free(walk);
-
-
-}
-
-void refWalk(git_repository *repo){
-  git_strarray ref_list;
-  git_reference_list(&ref_list, repo);
-  const char *refname;
-  git_reference *ref;
-  int i = 0;
-  char *out = new char[1024]();
-  for (i = 0; i < ref_list.count; ++i) {
-    refname = ref_list.strings[i];
-    git_reference_lookup(&ref, repo, refname);
-    switch (git_reference_type(ref)) {
-    case GIT_REF_OID:
-      git_oid_fmt(out, git_reference_target(ref));
-      printf("%s [%s]\n", refname, out);
-      break;
-
-    case GIT_REF_SYMBOLIC:
-      printf("%s => %s\n", refname, git_reference_symbolic_target(ref));
-      break;
-    default:
-      fprintf(stderr, "Unexpected reference type\n");
-      exit(1);
+    offset = sig->when.offset;
+    if (offset < 0) {
+        sign = '-';
+        offset = -offset;
+    } else {
+        sign = '+';
     }
-  }
-  git_strarray_free(&ref_list);
-  free(out);
+
+    hours   = offset / 60;
+    minutes = offset % 60;
+
+    printf("%s %s <%s> %ld %c%02d%02d\n",
+           header, sig->name, sig->email, (long)sig->when.time,
+           sign, hours, minutes);
+}
+static void show_commit(const git_commit *commit)
+{
+    unsigned int i, max_i;
+    char oidstr[GIT_OID_HEXSZ + 1];
+
+    git_oid_tostr(oidstr, sizeof(oidstr), git_commit_tree_id(commit));
+    printf("tree %s\n", oidstr);
+
+    max_i = (unsigned int)git_commit_parentcount(commit);
+    for (i = 0; i < max_i; ++i) {
+        git_oid_tostr(oidstr, sizeof(oidstr), git_commit_parent_id(commit, i));
+        printf("parent %s\n", oidstr);
+    }
+
+    print_signature("author", git_commit_author(commit));
+    print_signature("committer", git_commit_committer(commit));
+
+    if (git_commit_message(commit))
+        printf("\n%s\n", git_commit_message(commit));
 }
 
-int main(void){
+
+int test(git_repository *repo){
+
+    char head_filepath[512];
+    FILE *head_fileptr;
+    char head_rev[41];
+
+    strcpy(head_filepath, REPO);
+
+    if(strrchr(REPO, '/') != (REPO+strlen(REPO)))
+        strcat(head_filepath, "/refs/heads/master");
+    else
+        strcat(head_filepath, "refs/heads/master");
+
+
+    if((head_fileptr = fopen(head_filepath, "r")) == NULL){
+        fprintf(stderr, "Error opening '%s'\n", head_filepath);
+        return 1;
+    }
+
+    if(fread(head_rev, 40, 1, head_fileptr) != 1){
+        fprintf(stderr, "Error reading from '%s'\n", head_filepath);
+        fclose(head_fileptr);
+        return 1;
+    }
+
+    fclose(head_fileptr);
+    git_oid oid;
+    git_revwalk *walker;
+    git_commit *commit;
+
+    if(git_oid_fromstr(&oid, head_rev) != 0){
+        fprintf(stderr, "Invalid git object: '%s'\n", head_rev);
+        return 1;
+    }
+
+    git_revwalk_new(&walker, repo);
+    git_revwalk_sorting(walker, GIT_SORT_TOPOLOGICAL);
+    git_revwalk_push(walker, &oid);
+
+    const char *commit_message;
+    const git_signature *commit_author;
+
+    while(git_revwalk_next(&oid, walker) == 0) {
+        if(git_commit_lookup(&commit, repo, &oid)){
+            fprintf(stderr, "Failed to lookup the next object\n");
+            return 1;
+        }
+        show_commit(commit);
+        git_commit_free(commit);
+    }
+
+    git_revwalk_free(walker);
+}
+int main(int argc, char *argv[]){
     int error = 0;
     git_libgit2_init();
     git_repository *repo = NULL;
-    error = git_clone(&repo,"https://github.com/pegleg2060/PwnDelorean.git" , "/tmp/yay", NULL);
+    error = git_clone(&repo,"https://github.com/pegleg2060/PwnDelorean.git" , OUTPUT_DIR, NULL);
     if (error != 0) {
         printGitError();
         exit(1);
     }
     printf("Git repo saved at: %s\n", git_repository_path(repo));
-    refWalk(repo);
+    test(repo);
     git_repository_free(repo);
+    system("rm -r /tmp/yay");
     return 0;
         
 }
