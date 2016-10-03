@@ -1,6 +1,6 @@
 extern "C" {
-    #include "../libgit2/include/git2.h"
-    #include "../libgit2/include/git2/clone.h"
+    #include "../deps/libgit2/include/git2.h"
+    #include "../deps/libgit2/include/git2/clone.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
@@ -13,15 +13,20 @@ extern "C" {
 #include <iostream>
 #include <dirent.h>
 #include <unordered_map>
+#include <fstream>
+#include "../deps/json/src/json.hpp"
+
+
 
 #define OUTPUT_DIR "/tmp/yay/"
 #define REPO OUTPUT_DIR ".git"
 
+using json = nlohmann::json;
 using namespace std;
 git_repository *repo = NULL;
 unordered_map <string, bool> blobs;
 
-static void parse_blob(const git_blob *blob)
+void parse_blob(const git_blob *blob)
 {
         fwrite(git_blob_rawcontent(blob), (size_t)git_blob_rawsize(blob), 1, stdout);
 }
@@ -29,8 +34,6 @@ static void parse_blob(const git_blob *blob)
 void print_git_error(){
     printf("ERROR: %s\n", giterr_last()->message);
 }
-
-
 
 
 void parse_tree_entry(const git_tree_entry *entry){
@@ -143,7 +146,10 @@ int cred_acquire_cb(git_cred **out,const char * url,const char * username_from_u
 }
 
 
+
+
 int main(int argc, char *argv[]){
+    /*
     int error = 0;
     git_libgit2_init();
     
@@ -156,6 +162,11 @@ int main(int argc, char *argv[]){
     test(repo);
     git_repository_free(repo);
     system("rm -r /tmp/yay");
+     */
+    json j;
+    j["pi"] = 3.141;
+    std::string s = j.dump();
+    std::cout << s << "\n";
     return 0;
         
 }

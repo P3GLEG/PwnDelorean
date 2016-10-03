@@ -1,0 +1,27 @@
+[
+  {
+    "description": "Decryption Key",
+    "type":"fileContent",
+    "regex": "CryptDeriveKey*"
+  },
+  {
+    "description": "Encryption Key",
+    "type": "fileContent",
+    "regex": "CryptGenKey*"
+  },
+  {
+    "description": "Encryption Key",
+    "type": "fileContent",
+    "regex": "HMACSHA1*"
+  },
+  {
+    "description": "Machine Key",
+    "type": "fileContent",
+    "regex": "machinekey*"
+  },
+  {
+    "description": "Potential MSBuild publish profile",
+    "type":"fileContent",
+    "regex": "\\A*\\.pubxml(\\.user)?\\z"
+  }
+]

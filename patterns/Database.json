@@ -1,0 +1,42 @@
+[
+    {
+      "description": "Database file",
+      "type": "secretFilename",
+      "regex":"\\.mdf$"
+    },
+    {
+      "description": "Database file",
+      "type": "secretFilename",
+      "regex": "\\.sdf$"
+    },
+    {
+      "description": "Database file",
+      "type": "secretFilename",
+      "regex": "\\.sql$"
+    },
+    {
+      "description": "Database file",
+      "type": "secretFilename",
+      "regex": "\\.sqlite$"
+    },
+    {
+      "description": "MySQL client command history file",
+      "type": "secretFilename",
+      "regex": "\\A\\.?mysql_history\\z"
+    },
+    {
+      "description": "PostgreSQL client command history file",
+      "type": "secretFilename",
+      "regex": "\\A\\.?psql_history\\z"
+    },
+    {
+      "description": "DBeaver SQL database manager configuration file",
+      "type": "secretFilename",
+      "regex": "\\A\\.?dbeaver-data-sources.xml\\z"
+    },
+    {
+      "description": "Ruby On Rails database configuration file",
+      "type": "secretFilename",
+      "regex": "database*.yml"
+    }
+]
