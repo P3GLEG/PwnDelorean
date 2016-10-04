@@ -4,18 +4,19 @@ extern "C" {
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
-
 }
 #ifndef _WIN32
     # include <pthread.h>
     # include <unistd.h>
 #endif
+#include <experimental/filesystem>
 #include <iostream>
 #include <dirent.h>
 #include <unordered_map>
 #include <fstream>
 #include "../deps/json/src/json.hpp"
-
+#include <plog/Log.h>
+#include <plog/Appenders/ColorConsoleAppender.h>
 
 
 #define OUTPUT_DIR "/tmp/yay/"
@@ -23,6 +24,9 @@ extern "C" {
 
 using json = nlohmann::json;
 using namespace std;
+namespace fs = std::experimental::filesystem;
+static vector<json> filenames_to_find;
+static vector<json> content_to_find;
 git_repository *repo = NULL;
 unordered_map <string, bool> blobs;
 
@@ -32,7 +36,7 @@ void parse_blob(const git_blob *blob)
 }
 
 void print_git_error(){
-    printf("ERROR: %s\n", giterr_last()->message);
+    LOG_ERROR << giterr_last()->message;
 }
 
 
@@ -45,7 +49,7 @@ void parse_tree_entry(const git_tree_entry *entry){
             git_oid_tostr(oidstr, sizeof(oidstr), git_tree_entry_id(entry));
             git_tree_entry_to_object(&blob, repo, entry);
             if(blobs[oidstr]){
-                cout << "Already exists" <<endl;
+                cout << "Already parsed" <<endl;
                 //
             }else{
                 parse_blob((const git_blob *)blob);
@@ -60,10 +64,7 @@ void parse_tree_entry(const git_tree_entry *entry){
 }
 int tree_walk_cb(const char *root, const git_tree_entry *entry, void *payload)
 {
-    const char *name = git_tree_entry_name(entry);
-    git_otype type = git_tree_entry_type(entry);
     parse_tree_entry(entry);
-    printf("Filename: %s \n", name);
     return 0;
 }
 
@@ -84,7 +85,7 @@ int parse_commit_tree(git_repository *repo, const git_commit *commit){
 }
 
 
-int test(git_repository *repo){
+int start(git_repository *repo){
     char head_filepath[512];
     FILE *head_fileptr;
     char head_rev[41];
@@ -117,8 +118,6 @@ int test(git_repository *repo){
     git_revwalk_new(&walker, repo);
     git_revwalk_sorting(walker, GIT_SORT_TOPOLOGICAL);
     git_revwalk_push(walker, &oid);
-
-
     while(git_revwalk_next(&oid, walker) == 0) {
         if(git_commit_lookup(&commit, repo, &oid)){
             fprintf(stderr, "Failed to lookup the next object\n");
@@ -127,28 +126,27 @@ int test(git_repository *repo){
         parse_commit_tree(repo,commit);
         git_commit_free(commit);
     }
-
     git_revwalk_free(walker);
 }
 
-int cred_acquire_cb(git_cred **out,const char * url,const char * username_from_url,unsigned int allowed_types,void * payload)
-{
-	char username[128] = {0};
-	char password[128] = {0};
 
-	printf("Username: ");
-	scanf("%s", username);
-
-	printf("Password: ");
-	scanf("%s", password);
-
-	return git_cred_userpass_plaintext_new(out, username, password);
+int read_patterns_dir(void){
+    fs::path patterns_dir;
+    patterns_dir += fs::current_path();
+    patterns_dir += "/patterns";
+    for (auto & p : fs::directory_iterator(patterns_dir)) {
+        std::ifstream jsonfile(p.path().string());
+        json j;
+        jsonfile >> j;
+        for (json::iterator it = j.begin(); it != j.end(); ++it) {
+            (it.value()["type"] == "secretFilename" ?
+             filenames_to_find : content_to_find)
+                    .push_back(it.value());
+        }
+    }
 }
 
-
-
-
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
     /*
     int error = 0;
     git_libgit2_init();
@@ -163,10 +161,15 @@ int main(int argc, char *argv[]){
     git_repository_free(repo);
     system("rm -r /tmp/yay");
      */
-    json j;
-    j["pi"] = 3.141;
-    std::string s = j.dump();
-    std::cout << s << "\n";
+    static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
+    plog::init(plog::verbose, &consoleAppender);
+    LOG_VERBOSE << "This is a VERBOSE message";
+    /*
+    read_patterns_dir();
+    for (auto it = filenames_to_find.begin(); it != filenames_to_find.end(); ++it) {
+        cout << *it << "\n";
+    }
+     */
     return 0;
-        
 }
+

@@ -7,3 +7,6 @@
 [submodule "deps/libgit2"]
 	path = deps/libgit2
 	url = https://github.com/libgit2/libgit2.git
+[submodule "deps/plog"]
+	path = deps/plog
+	url = https://github.com/SergiusTheBest/plog.git
