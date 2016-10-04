@@ -141,7 +141,6 @@
     "type": "secretFilename",
     "regex": "\\A\\.?htpasswd\\z"
   },
-
   {
     "description": "Potential MediaWiki configuration file",
     "type": "secretFilename",
@@ -151,5 +150,9 @@
     "description": "Rubygems credentials file",
     "type": "secretFilename",
     "regex": "\\A\\.?gem/credentials\\z"
-  }
-]
+  },
+  {
+    "description": "SSH file",
+    "type": "secretFilename",
+    "regex": ".ssh*"
+  }]
