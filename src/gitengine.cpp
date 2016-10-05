@@ -67,14 +67,15 @@ int parse_commit_tree(git_repository *repo, const git_commit *commit) {
     return SUCCESS;
 }
 
-int GitEngine::start(std::string url) {
+int GitEngine::start(const char *url,const char *output_dir ) {
     int error = 0;
     git_libgit2_init();
     engine.Init();
-    error = git_clone(&repo, url.c_str(), OUTPUT_DIR, NULL);
+    error = git_clone(&repo, url, output_dir, NULL);
     if (error != 0) {
         print_git_error();
-        exit(FAIL);
+        LOG_DEBUG << "Repo has previously been cloned into " << output_dir; 
+        git_repository_open(&repo, output_dir);
     }
     LOG_VERBOSE << "Git repo saved at: " << git_repository_path(repo);
     char head_filepath[512];

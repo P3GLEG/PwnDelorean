@@ -21,7 +21,7 @@ extern "C" {
 class GitEngine {
 
 public:
-    int start(std::string url);
+    int start(const char *url, const char* output_dir);
 
 };
 
