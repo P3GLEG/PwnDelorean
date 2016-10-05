@@ -2,17 +2,15 @@
  * @Author Paul Ganea
  */
 extern "C" {
-#include "../deps/libgit2/include/git2.h"
+    #include "../deps/libgit2/include/git2.h"
 }
-#ifndef _WIN32
-
-#endif
 
 #include <map>
 #include <fstream>
 #include <re2.h>
 #include <re2/set.h>
 #include "gitengine.h"
+#include "util.h"
 #define ARGS_INFO_INIT { argc, argv, 0 }
 
 const char *title = 
@@ -45,6 +43,10 @@ const char *delorean =
  "              |>>>>>>||                            ||<<<<<<|\n"
  "              `\\<<<<>>>>/'                       `\\<<<<>>>>/'\n";
 
+ const char *argument_list = 
+"\t-o output directory\n"
+"\t-u remote repo url\n";
+
 struct opts {
 	const char *output_dir;
     const char *repo_url;
@@ -63,15 +65,14 @@ void parse_opts(struct opts *o, int argc, char *argv[]);
 
 void usage(const char *message, const char *arg)
 {
-	if (message && arg)
-		fprintf(stderr, "%s: %s\n", message, arg);
-	else if (message)
-		fprintf(stderr, "%s\n", message);
-	std::cout << title << "\n";
-    std::cout << delorean << "\n";
-	fprintf(stderr,
-			"usage: -o output directory -u remote repo url\n");
-	exit(1);
+    if (message && arg)
+	    std::cout << RED <<  "+ ERROR: " << message << ": " <<  arg << "\n\n" << RESET ;
+	else if (message){
+        std::cout << RED << "+ ERROR: " <<  message << "\n\n" << RESET;
+    }else{
+        std::cout << WHITE << "Usage: pwndelorean -u https://github.com/pegleg2060/PwnDelorean.git -o /tmp/repo \n" ;
+        std::cout << WHITE << argument_list << RESET;
+    }
 }
 
 size_t is_prefixed(const char *str, const char *pfx){
@@ -105,7 +106,7 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
 	struct args_info args = ARGS_INFO_INIT;
 	for (args.pos = 1; args.pos < argc; ++args.pos) {
 		char *a = argv[args.pos];
-		if (!strcmp(a, "-o")){
+        if (!strcmp(a, "-o")){
             o->output_dir = argv[++args.pos];
         }
         else if (!strcmp(a, "-u")){
@@ -118,6 +119,10 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
 			usage("Unknown option", a);
         }
 	}
+    if(argc == 1) {
+        usage(NULL,NULL);
+        exit(FAIL);
+    }
 }
 
 int init(void) {
@@ -128,6 +133,9 @@ int init(void) {
 }
 
 int main(int argc, char *argv[]) {
+    std::cout << CYAN << title << "\n";
+    std::cout << delorean << "\n";
+    std::cout << "---------------------------------------------------------------------------" << "\n" <<RESET;
     if (init() != 0) {
         LOG_ERROR << "Failed to initialize the program";
         exit(FAIL);
@@ -135,9 +143,12 @@ int main(int argc, char *argv[]) {
 	struct opts o = { "", "", "", 0, 0 };
 	parse_opts(&o, argc, argv);
     if (strcmp(o.repo_url, "") == 0){
-        LOG_ERROR << "Please provide a URL to clone";
-        usage(NULL,NULL);
-
+        usage("Please provide a URL to clone",NULL);
+        exit(FAIL);
+    }
+    if (strcmp(o.output_dir, "") == 0){
+        usage("Please provide an output directory to clone to",NULL);
+        exit(FAIL);
     }
     LOG_DEBUG << "Output Directory set to : " << o.output_dir;
     LOG_DEBUG << "Repo URL set to : " << o.repo_url;
