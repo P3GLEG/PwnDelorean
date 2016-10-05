@@ -1,13 +1,19 @@
 project(pwndelorean)
 cmake_minimum_required(VERSION 3.1)
 include(CheckCXXCompilerFlag)
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-set(LIBGIT_DIR ${CMAKE_SOURCE_DIR}/deps/libgit2)
+set(LIBGIT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps/libgit2)
+set(LIBGIT_INCLUDE_DIR ${LIBGIT_SOURCE_DIR}/include)
 set(PLOG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/deps/plog/include)
 set(RE2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/deps/re2/re2)
-set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+
+file(GLOB_RECURSE PWNDELOREAN_HEADERS ${CMAKE_SOURCE_DIR}/src)
+file(GLOB_RECURSE PWNDELOREAN_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+#set(PWNDELOREAN_SOURCES ${CMAKE_SOURCE_DIR}/src/)
+
+
 find_package(Threads REQUIRED)
-find_package(PkgConfig REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -27,6 +33,10 @@ FILE(COPY ${CMAKE_SOURCE_DIR}/patterns DESTINATION .)
 
 INCLUDE_DIRECTORIES(${PLOG_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${RE2_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${LIBGIT2_INCLUDE_DIRS})
-ADD_EXECUTABLE(pwndelorean ${SRC_DIR}/main.cpp)
-TARGET_LINK_LIBRARIES(pwndelorean stdc++fs re2 ${OPENSSL_LIBRARIES} Threads::Threads   ${LIBGIT_DIR}/build/libgit2.a ssh2 z http_parser)
+INCLUDE_DIRECTORIES(${LIBGIT_INCLUDE_DIRS})
+
+INCLUDE_DIRECTORIES(${PWNDELOREAN_HEADERS})
+#ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES}/engine.cpp ${PWNDELOREAN_SOURCES}/gitengine.cpp ${PWNDELOREAN_SOURCES}/main.cpp)
+ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES})
+#All these libraries are required by libgit2
+TARGET_LINK_LIBRARIES(pwndelorean stdc++fs re2 ${OPENSSL_LIBRARIES} Threads::Threads ${LIBGIT_SOURCE_DIR}/build/libgit2.a ssh2 z http_parser)
