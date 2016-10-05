@@ -1,3 +1,5 @@
+#ifndef _UTIL_
+#define _UTIL_
 #include <plog/Log.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
 
@@ -23,3 +25,29 @@
 #define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
 #define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+
+
+
+static bool yes_or_no(const char* message)
+{
+    std::string line;
+    std::cout << message << std::endl;
+    if (std::getline(std::cin, line))
+    {
+        if(line[0] == 'y' || line[0] == 'y'){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    return false;
+}
+
+static bool check_filepath_backslash_required(const char* path){
+	if(path[strlen(path) - 1] == '/')
+		return false;
+     else
+		return true;
+
+}
+#endif

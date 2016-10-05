@@ -1,4 +1,5 @@
 #include "gitengine.h"
+#include "util.h"
 #include "engine.h"
 
 
@@ -67,37 +68,7 @@ int parse_commit_tree(git_repository *repo, const git_commit *commit) {
     return SUCCESS;
 }
 
-int GitEngine::start(const char *url,const char *output_dir ) {
-    int error = 0;
-    git_libgit2_init();
-    engine.Init();
-    error = git_clone(&repo, url, output_dir, NULL);
-    if (error != 0) {
-        print_git_error();
-        LOG_DEBUG << "Repo has previously been cloned into " << output_dir; 
-        git_repository_open(&repo, output_dir);
-    }
-    LOG_VERBOSE << "Git repo saved at: " << git_repository_path(repo);
-    char head_filepath[512];
-    FILE *head_fileptr;
-    char head_rev[41];
-    strcpy(head_filepath, REPO);
-    //TODO: Add different refs
-    if (strrchr(REPO, '/') != (REPO + strlen(REPO)))
-        strcat(head_filepath, "/refs/heads/master");
-    else
-        strcat(head_filepath, "refs/heads/master");
-
-    if ((head_fileptr = fopen(head_filepath, "r")) == NULL) {
-        fprintf(stderr, "Error opening '%s'\n", head_filepath);
-        return FAIL;
-    }
-    if (fread(head_rev, 40, 1, head_fileptr) != 1) {
-        fprintf(stderr, "Error reading from '%s'\n", head_filepath);
-        fclose(head_fileptr);
-        return FAIL;
-    }
-    fclose(head_fileptr);
+int begin_rev_traverse(const char* head_rev){
     git_oid oid;
     git_revwalk *walker;
     git_commit *commit;
@@ -119,12 +90,46 @@ int GitEngine::start(const char *url,const char *output_dir ) {
         git_commit_free(commit);
     }
     for (auto i: engine.filename_matches) {
-        LOG_VERBOSE << "Filename match: " << i.first;
+        LOG_INFO << "Filename match: " << i.first;
     }
     for (auto i: engine.content_matches) {
-        LOG_VERBOSE << "Content match: " << i.first;
+        LOG_INFO<< "Content match: " << i.first;
     }
     git_revwalk_free(walker);
+}
+
+
+int GitEngine::start(const char *url,const char *output_dir ) {
+    int error = 0;
+    char head_filepath[512];
+    FILE *head_fileptr;
+    char head_rev[41];
+    git_libgit2_init();
+    engine.Init();
+    error = git_clone(&repo, url, output_dir, NULL);
+    if (error != 0) {
+        LOG_DEBUG << "Repo has previously been cloned into " << output_dir; 
+        git_repository_open(&repo, output_dir);
+    }
+    LOG_VERBOSE << "Git repo saved at: " << git_repository_path(repo);
+    strcpy(head_filepath, git_repository_path(repo));
+    if(check_filepath_backslash_required(output_dir)){
+        strcat(head_filepath, "/");
+    }
+    strcat(head_filepath, "refs/heads/master");
+    //TODO: Add different refs
+
+    if ((head_fileptr = fopen(head_filepath, "r")) == NULL) {
+        fprintf(stderr, "Error opening '%s'\n", head_filepath);
+        return FAIL;
+    }
+    if (fread(head_rev, 40, 1, head_fileptr) != 1) {
+        fprintf(stderr, "Error reading from '%s'\n", head_filepath);
+        fclose(head_fileptr);
+        return FAIL;
+    }
+    fclose(head_fileptr);
+    begin_rev_traverse(head_rev);
     git_repository_free(repo);
     git_libgit2_shutdown();
     return SUCCESS;

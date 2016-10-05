@@ -54,9 +54,7 @@ bool Engine::search_for_content_match(std::string line) {
     std::vector<int> matched_regexes;
     content_regexes.Match(line, &matched_regexes);
     if (matched_regexes.size() != 0) {
-        for (auto i: matched_regexes) {
-            LOG_ERROR << i;
-        }
+        
         content_matches[line] = true;
         //Fast finsh, if you want to add which regex was matched do it here
         return true;

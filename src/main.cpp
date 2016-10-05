@@ -44,13 +44,16 @@ const char *delorean =
  "              `\\<<<<>>>>/'                       `\\<<<<>>>>/'\n";
 
  const char *argument_list = 
-"\t-o output directory\n"
-"\t-u remote repo url\n";
+"\t-o Output Directory\n"
+"\t-o Local Git Directory\n"
+"\t-u Remote Git Repo URL\n"
+"\t-iL List of Remote Git Repos\n";
 
 struct opts {
 	const char *output_dir;
     const char *repo_url;
-    const char *local_repo; //TODO: Add case where you clone a repo onto local disk
+    const char *local_repo; 
+    const char *input_file;
 	int action;
 	int verbose;
 };
@@ -111,6 +114,8 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
         }
         else if (!strcmp(a, "-u")){
             o->repo_url = argv[++args.pos];
+        }else if (!strcmp(a, "-iL")){
+            o->input_file = argv[++args.pos];
         }
 		else if (!strcmp(a, "--help") || !strcmp(a, "-h")){
 			usage(NULL, NULL);
@@ -123,12 +128,21 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
         usage(NULL,NULL);
         exit(FAIL);
     }
+    else if (strcmp(o->repo_url, "") == 0 && strcmp(o->local_repo,"") != 0){
+        usage("Please provide a URL to clone",NULL);
+        exit(FAIL);
+    }
+    else if (strcmp(o->output_dir, "") == 0){
+        usage("Please provide an output directory to clone to",NULL);
+        exit(FAIL);
+    }
+    
 }
 
 int init(void) {
     static plog::RollingFileAppender<plog::CsvFormatter> fileAppender("debug.txt", 100000000, 3);
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    plog::init(plog::verbose, &consoleAppender).addAppender(&fileAppender);
+    plog::init(plog::info, &consoleAppender).addAppender(&fileAppender);
     return SUCCESS;
 }
 
@@ -140,16 +154,9 @@ int main(int argc, char *argv[]) {
         LOG_ERROR << "Failed to initialize the program";
         exit(FAIL);
     }
-	struct opts o = { "", "", "", 0, 0 };
+	struct opts o = { "", "", "","", 0, 0 };
 	parse_opts(&o, argc, argv);
-    if (strcmp(o.repo_url, "") == 0){
-        usage("Please provide a URL to clone",NULL);
-        exit(FAIL);
-    }
-    if (strcmp(o.output_dir, "") == 0){
-        usage("Please provide an output directory to clone to",NULL);
-        exit(FAIL);
-    }
+    
     LOG_DEBUG << "Output Directory set to : " << o.output_dir;
     LOG_DEBUG << "Repo URL set to : " << o.repo_url;
     GitEngine git;
