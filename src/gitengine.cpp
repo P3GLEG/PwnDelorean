@@ -58,12 +58,12 @@ int parse_commit_tree(git_repository *repo, const git_commit *commit) {
     error = git_tree_lookup(&tree, repo, git_commit_tree_id(commit));
     if (error != 0) {
         print_git_error();
-        return FAIL;
+        return FAILURE;
     }
     error = git_tree_walk(tree, GIT_TREEWALK_PRE, tree_walk_cb, NULL);
     if (error != 0) {
         print_git_error();
-        return FAIL;
+        return FAILURE;
     }
     return SUCCESS;
 }
@@ -75,7 +75,7 @@ int begin_rev_traverse(const char* head_rev){
 
     if (git_oid_fromstr(&oid, head_rev) != 0) {
         fprintf(stderr, "Invalid git object: '%s'\n", head_rev);
-        return FAIL;
+        return FAILURE;
     }
 
     git_revwalk_new(&walker, repo);
@@ -84,7 +84,7 @@ int begin_rev_traverse(const char* head_rev){
     while (git_revwalk_next(&oid, walker) == 0) {
         if (git_commit_lookup(&commit, repo, &oid)) {
             fprintf(stderr, "Failed to lookup the next object\n");
-            return FAIL;
+            return FAILURE;
         }
         parse_commit_tree(repo, commit);
         git_commit_free(commit);
@@ -121,12 +121,12 @@ int GitEngine::start(const char *url,const char *output_dir ) {
 
     if ((head_fileptr = fopen(head_filepath, "r")) == NULL) {
         fprintf(stderr, "Error opening '%s'\n", head_filepath);
-        return FAIL;
+        return FAILURE;
     }
     if (fread(head_rev, 40, 1, head_fileptr) != 1) {
         fprintf(stderr, "Error reading from '%s'\n", head_filepath);
         fclose(head_fileptr);
-        return FAIL;
+        return FAILURE;
     }
     fclose(head_fileptr);
     begin_rev_traverse(head_rev);

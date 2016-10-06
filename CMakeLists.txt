@@ -1,6 +1,7 @@
 project(pwndelorean)
 cmake_minimum_required(VERSION 3.1)
 include(CheckCXXCompilerFlag)
+enable_testing()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(LIBGIT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps/libgit2)
@@ -10,7 +11,6 @@ set(RE2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/deps/re2/re2)
 
 file(GLOB_RECURSE PWNDELOREAN_HEADERS ${CMAKE_SOURCE_DIR}/src)
 file(GLOB_RECURSE PWNDELOREAN_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
-#set(PWNDELOREAN_SOURCES ${CMAKE_SOURCE_DIR}/src/)
 
 
 find_package(Threads REQUIRED)

@@ -5,7 +5,7 @@
 
 
 #define SUCCESS 0
-#define FAIL -1
+#define FAILURE -1
 
 
 #define RESET   "\033[0m"

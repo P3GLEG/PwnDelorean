@@ -126,15 +126,15 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
 	}
     if(argc == 1) {
         usage(NULL,NULL);
-        exit(FAIL);
+        exit(FAILURE);
     }
     else if (strcmp(o->repo_url, "") == 0 && strcmp(o->local_repo,"") != 0){
         usage("Please provide a URL to clone",NULL);
-        exit(FAIL);
+        exit(FAILURE);
     }
     else if (strcmp(o->output_dir, "") == 0){
         usage("Please provide an output directory to clone to",NULL);
-        exit(FAIL);
+        exit(FAILURE);
     }
     
 }
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
     std::cout << "---------------------------------------------------------------------------" << "\n" <<RESET;
     if (init() != 0) {
         LOG_ERROR << "Failed to initialize the program";
-        exit(FAIL);
+        exit(FAILURE);
     }
 	struct opts o = { "", "", "","", 0, 0 };
 	parse_opts(&o, argc, argv);

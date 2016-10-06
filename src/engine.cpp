@@ -34,7 +34,7 @@ int Engine::read_patterns_dir(void) {
     }
     if (!filenames_regexes.Compile() | !content_regexes.Compile()) {
         LOG_ERROR << "Error while compiling regexes";
-        return FAIL;
+        return FAILURE;
     }
     return SUCCESS;
 }
