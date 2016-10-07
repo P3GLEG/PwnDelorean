@@ -51,9 +51,12 @@ void Engine::Init(void) {
         LOG_ERROR << "Error while compiling regexes";
         exit(FAILURE);
     }
+
+    //TODO:Add check here for if you only want secretfilenames vs content
 }
 
 void Engine::Shutdown(void){
+
     for (auto i: filename_matches) {
         piston temp = i.second;
         LOG_INFO << "Filename match: " << temp.line_matched << " " << temp.oid ;
@@ -84,7 +87,6 @@ bool Engine::search_for_content_match(std::string line, int line_number, std::st
         temp.oid = oid;
 
         content_matches[temp.line_matched] = temp;
-        //Fast finsh, if you want to add which regex was matched do it here
         return true;
     }
 
@@ -102,7 +104,7 @@ bool Engine::search_for_filename_match(std::string filename, std::string oid) {
     if (matched_regexes.size() != 0) {
         piston temp;
         for (auto i: matched_regexes){
-            temp.regexes_matched.push_back(content_regexes_cache[i]);
+            temp.regexes_matched.push_back(filename_regexes_cache[i]);
         }
         temp.oid = oid;
         temp.line_matched = filename;
