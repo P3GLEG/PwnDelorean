@@ -17,13 +17,15 @@ void print_git_error() {
     LOG_ERROR << giterr_last()->message;
 }
 
-void parse_blob(const git_blob *blob) {
+void parse_blob(const git_blob *blob, std::string filename, std::string oid) {
     std::string temp((const char *) git_blob_rawcontent(blob), (size_t) git_blob_rawsize(blob));
     if (!temp.empty()) {
         std::stringstream ss(temp);
         std::string line;
+        int line_number = 0;
         while (std::getline(ss, line, '\n')) {
-            engine.search_for_content_match(line);
+            engine.search_for_content_match(line ,line_number, filename, oid);
+            line_number++;
         }
     }
 }
@@ -37,12 +39,12 @@ void parse_tree_entry(const git_tree_entry *entry) {
             git_oid_tostr(oidstr, sizeof(oidstr), git_tree_entry_id(entry));
             git_tree_entry_to_object(&blob, repo, entry);
             std::string filename(git_tree_entry_name(entry));
-            if (blobs[oidstr]) {
+            if (blobs[oidstr]) { // We can assume that the SHA1 hash has already been found previously
                 LOG_DEBUG << "Already parsed file: " << filename << oidstr;
             } else {
                 //TODO: Add oidstr to output
-                parse_blob((const git_blob *) blob);
-                engine.search_for_filename_match(filename);
+                parse_blob((const git_blob *) blob, filename, oidstr);
+                engine.search_for_filename_match(filename, oidstr);
                 blobs[oidstr] = true;
             }
         }
@@ -99,7 +101,7 @@ int begin_rev_traverse(const char* head_rev){
     git_revwalk_free(walker);
 }
 
-int traverse(std::string head_filepath){
+int traverse_head_branch(std::string head_filepath){
     FILE *head_fileptr;
     char head_rev[41];
     if ((head_fileptr = fopen(head_filepath.c_str(), "r")) == NULL) {
@@ -128,18 +130,12 @@ int begin(const char *local_repo_dir) {
            LOG_DEBUG << "Remote branch found :" << path ;
         for(auto& rev_file: fs::directory_iterator(path.path())){
             LOG_DEBUG << "Branch filename found :" << rev_file;
-            traverse(rev_file.path());
+            traverse_head_branch(rev_file.path());
         }
     }
-
     git_repository_free(repo);
     git_libgit2_shutdown();
-    for (auto i: engine.filename_matches) {
-        LOG_INFO << "Filename match: " << i.first;
-    }
-    for (auto i: engine.content_matches) {
-        LOG_INFO<< "Content match: " << i.first;
-    }
+    engine.Shutdown();
     return SUCCESS;
 }
 

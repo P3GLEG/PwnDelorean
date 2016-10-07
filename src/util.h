@@ -28,6 +28,7 @@
 
 
 
+
 static bool yes_or_no(const char* message)
 {
     std::string line;

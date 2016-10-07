@@ -3,10 +3,13 @@
 #include "util.h"
 
 
+
 RE2::Set filenames_regexes(RE2::DefaultOptions, RE2::UNANCHORED);
 RE2::Set content_regexes(RE2::DefaultOptions, RE2::UNANCHORED);
-std::map<std::string, bool> filename_matches;
-std::map<std::string, bool> content_matches;
+std::vector<std::string> filename_regexes_cache;
+std::vector<std::string> content_regexes_cache;
+std::map<std::string, piston> filename_matches;
+std::map<std::string, piston> content_matches;
 std::string *error_holder = NULL;
 
 
@@ -25,10 +28,14 @@ int Engine::read_patterns_dir(void) {
             std::string regex = it.value()["regex"];
             if (it.value()["type"] == "secretFilename") {
                 LOG_DEBUG << "Filename Regex : " << regex;
-                filenames_regexes.Add(regex, error_holder);
+                if(filenames_regexes.Add(regex, error_holder) != FAILURE){
+                    filename_regexes_cache.push_back(regex);
+                };
             } else {
                 LOG_DEBUG << "Content Regex : " << regex;
-                content_regexes.Add(regex, error_holder);
+                if( content_regexes.Add(regex, error_holder) != FAILURE){
+                    content_regexes_cache.push_back(regex);
+                }
             }
         }
         jsonfile.close();
@@ -48,26 +55,35 @@ void Engine::Init(void) {
 
 void Engine::Shutdown(void){
     for (auto i: filename_matches) {
-        LOG_INFO << "Filename match: " << i.first;
+        piston temp = i.second;
+        LOG_INFO << "Filename match: " << temp.line_matched << " " << temp.oid ;
     }
     for (auto i: content_matches) {
-        LOG_INFO<< "Content match: " << i.first;
+        piston temp = i.second;
+        LOG_INFO<<"[" <<temp.path_to_file << "] Content match: " << i.first << " found by: " << temp.regexes_matched[0] << " " << temp.oid;
     }
 }
 
 
-bool Engine::search_for_content_match(std::string line) {
+bool Engine::search_for_content_match(std::string line, int line_number, std::string path, std::string oid) {
     if (content_matches.count(line) > 0) {
         //Already found this no need to do work again
         LOG_DEBUG << "Attempted to parse " << line << " again";
-
         return true;
     }
     std::vector<int> matched_regexes;
     content_regexes.Match(line, &matched_regexes);
     if (matched_regexes.size() != 0) {
-        
-        content_matches[line] = true;
+        piston temp;
+        for(auto i: matched_regexes){
+            temp.regexes_matched.push_back(content_regexes_cache[i]);
+        }
+        temp.line_matched = line;
+        temp.linenumber = line_number;
+        temp.path_to_file = path;
+        temp.oid = oid;
+
+        content_matches[temp.line_matched] = temp;
         //Fast finsh, if you want to add which regex was matched do it here
         return true;
     }
@@ -75,7 +91,7 @@ bool Engine::search_for_content_match(std::string line) {
     return false;
 }
 
-bool Engine::search_for_filename_match(std::string filename) {
+bool Engine::search_for_filename_match(std::string filename, std::string oid) {
     if (filename_matches.count(filename) > 0) {
         //Already found this no need to do work again
         LOG_DEBUG << "Attempted to parse " << filename << " again";
@@ -84,7 +100,13 @@ bool Engine::search_for_filename_match(std::string filename) {
     std::vector<int> matched_regexes;
     filenames_regexes.Match(filename, &matched_regexes);
     if (matched_regexes.size() != 0) {
-        filename_matches[filename] = true;
+        piston temp;
+        for (auto i: matched_regexes){
+            temp.regexes_matched.push_back(content_regexes_cache[i]);
+        }
+        temp.oid = oid;
+        temp.line_matched = filename;
+        filename_matches[filename] = temp;
         //Fast finish, if you want to add which regex was matched do it here
         return true;
     }
