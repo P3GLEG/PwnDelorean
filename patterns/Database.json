@@ -38,6 +38,6 @@
     {
       "description": "Ruby On Rails database configuration file",
       "type": "secretFilename",
-      "regex": "database*.yml"
+      "regex":"database[\\s\\S]*.yml"
     }
 ]

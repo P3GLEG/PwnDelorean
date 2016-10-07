@@ -22,12 +22,13 @@
   {
     "description": "Pidgin chat client account configuration file",
     "type": "secretFilename",
-    "regex": "\\.?purple\\/accounts\\.xml\\z"
+    "regex": "accounts[\\s\\S]*.xml"
   },
   {
     "description": "Hexchat/XChat IRC client server list configuration file",
     "type": "secretFilename",
-    "regex": "\\.?xchat2?\\/servlist_?\\.conf\\z"
+    "regex": ".?xchat2[\\s\\S]*.conf"
+
   },
   {
     "description": "Irssi IRC client configuration file",
@@ -37,7 +38,7 @@
   {
     "description": "Recon-ng web reconnaissance framework API key database",
     "type": "secretFilename",
-    "regex": "\\.?recon-ng\\/keys\\.db\\z"
+    "regex": ".?recon-ng[\\s\\S]*.db"
   },
   {
     "description": "Mutt e-mail client configuration file",
@@ -47,12 +48,12 @@
   {
     "description": "S3cmd configuration file",
     "type": "secretFilename",
-    "regex": "\\A\\.?s3cfg\\z"
+    "regex": "\\.s3cfg$"
   },
   {
     "description": "T command-line Twitter client configuration file",
     "type": "secretFilename",
-    "regex": "\\A\\.?trc\\z"
+    "regex": "\\.trc$"
   },
   {
     "description": "OpenVPN client configuration file",
@@ -103,7 +104,17 @@
   {
     "description": "PHP configuration file",
     "type": "secretFilename",
-    "regex": "\\A(.*)?config(\\.inc)?\\.php\\z"
+    "regex": ".?config[\\s\\S]*.php"
+  },
+  {
+    "description": "Client SSH Config",
+    "type": "secretFilename",
+    "regex": ".?ssh_config[\\s\\S]*"
+  },
+  {
+    "description": "Server SSH Config",
+    "type": "secretFilename",
+    "regex": ".?sshd_config[\\s\\S]*"
   },
   {
     "description": "KeePass password manager database file",

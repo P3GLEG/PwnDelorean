@@ -1,6 +1,6 @@
 #include "../src/engine.cpp"
 #include <gtest/gtest.h>
-class SecretFileNames: public ::testing::Test {
+class EngineTests: public ::testing::Test {
     protected:
 
         virtual void SetUp(){
@@ -11,7 +11,8 @@ class SecretFileNames: public ::testing::Test {
 
     Engine e;
 };
-TEST_F(SecretFileNames, CheckMatches1) { 
+
+TEST_F(EngineTests,RealisticFileNames ) { 
     ASSERT_TRUE(e.search_for_filename_match("prod.pfx"));
     ASSERT_TRUE(e.search_for_filename_match("test.cscfg"));
     ASSERT_TRUE(e.search_for_filename_match("doesntmatter.pubxml"));
@@ -42,7 +43,7 @@ TEST_F(SecretFileNames, CheckMatches1) {
     ASSERT_TRUE(e.search_for_filename_match("xchat2.conf"));
     ASSERT_TRUE(e.search_for_filename_match("irssi.config"));
     ASSERT_TRUE(e.search_for_filename_match("recon-ng.db"));
-    ASSERT_TRUE(e.search_for_filename_match("muttrc"));
+    ASSERT_TRUE(e.search_for_filename_match(".muttrc"));
     ASSERT_TRUE(e.search_for_filename_match("whatisthis.s3cfg"));
     ASSERT_TRUE(e.search_for_filename_match("yay.trc"));
     ASSERT_TRUE(e.search_for_filename_match(".ovpn"));
@@ -57,7 +58,7 @@ TEST_F(SecretFileNames, CheckMatches1) {
     ASSERT_TRUE(e.search_for_filename_match("carrierwave.rb"));
     ASSERT_TRUE(e.search_for_filename_match("schema.rb"));
     ASSERT_TRUE(e.search_for_filename_match("settings.py"));
-    ASSERT_TRUE(e.search_for_filename_match("config.ph"));
+    ASSERT_TRUE(e.search_for_filename_match("config.php"));
     ASSERT_TRUE(e.search_for_filename_match("yay.kdb"));
     ASSERT_TRUE(e.search_for_filename_match("mine.agilekeychain"));
     ASSERT_TRUE(e.search_for_filename_match("whywouldthisbeinhere.keychain"));
@@ -67,7 +68,10 @@ TEST_F(SecretFileNames, CheckMatches1) {
     ASSERT_TRUE(e.search_for_filename_match(".htpasswd"));
     ASSERT_TRUE(e.search_for_filename_match("LocalSettings.php"));
     ASSERT_TRUE(e.search_for_filename_match(".gem/credentials"));
-    ASSERT_TRUE(e.search_for_filename_match(".ssh"));
+    ASSERT_TRUE(e.search_for_filename_match("ssh_config"));
+    ASSERT_TRUE(e.search_for_filename_match("sshd_config"));
+    
+
 }
  
  
