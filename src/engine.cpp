@@ -46,6 +46,15 @@ void Engine::Init(void) {
     }
 }
 
+void Engine::Shutdown(void){
+    for (auto i: filename_matches) {
+        LOG_INFO << "Filename match: " << i.first;
+    }
+    for (auto i: content_matches) {
+        LOG_INFO<< "Content match: " << i.first;
+    }
+}
+
 
 bool Engine::search_for_content_match(std::string line) {
     if (content_matches.count(line) > 0) {
@@ -81,3 +90,4 @@ bool Engine::search_for_filename_match(std::string filename) {
     }
     return false;
 }
+

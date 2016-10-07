@@ -20,6 +20,7 @@ public:
     std::map<std::string, bool> content_matches;
 
     void Init(void);
+    void Shutdown();
 
 private:
     int read_patterns_dir(void);

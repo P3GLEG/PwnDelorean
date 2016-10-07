@@ -1,5 +1,5 @@
+#include "filesystemengine.h"
 #include "gitengine.h"
-#include "engine.h"
 
 namespace fs = std::experimental::filesystem;
 Engine engine;
@@ -95,12 +95,7 @@ int begin_rev_traverse(const char* head_rev){
         parse_commit_tree(repo, commit);
         git_commit_free(commit);
     }
-    for (auto i: engine.filename_matches) {
-        LOG_INFO << "Filename match: " << i.first;
-    }
-    for (auto i: engine.content_matches) {
-        LOG_INFO<< "Content match: " << i.first;
-    }
+
     git_revwalk_free(walker);
 }
 
@@ -139,6 +134,12 @@ int begin(const char *local_repo_dir) {
 
     git_repository_free(repo);
     git_libgit2_shutdown();
+    for (auto i: engine.filename_matches) {
+        LOG_INFO << "Filename match: " << i.first;
+    }
+    for (auto i: engine.content_matches) {
+        LOG_INFO<< "Content match: " << i.first;
+    }
     return SUCCESS;
 }
 

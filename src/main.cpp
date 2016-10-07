@@ -11,6 +11,7 @@ extern "C" {
 #include <re2/set.h>
 #include "gitengine.h"
 #include "util.h"
+#include "filesystemengine.h"
 #define ARGS_INFO_INIT { argc, argv, 0 }
 
 const char *title = 
@@ -47,9 +48,11 @@ const char *delorean =
 "\t-o Clone Directory\n"
 "\t-l Local Git Directory\n"
 "\t-u Remote Git Repo URL\n"
+"\t-f Scan Filesystem Location\n"
 "\t-iL List of Remote Git Repos\n";
 
 struct opts {
+    const char *filesystem_dir;
 	const char *clone_dir;
     const char *repo_url;
     const char *local_repo; 
@@ -72,10 +75,10 @@ void usage(const char *message, const char *arg)
 	    std::cout << RED <<  "+ ERROR: " << message << ": " <<  arg << "\n\n" << RESET ;
 	else if (message){
         std::cout << RED << "+ ERROR: " <<  message << "\n\n" << RESET;
-    }else{
+    }
         std::cout << WHITE << "Usage: pwndelorean -u https://github.com/pegleg2060/PwnDelorean.git -o /tmp/repo \n" ;
         std::cout << WHITE << argument_list << RESET;
-    }
+
 }
 
 size_t is_prefixed(const char *str, const char *pfx){
@@ -112,6 +115,9 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
         if (!strcmp(a, "-o")){
             o->clone_dir = argv[++args.pos];
         }
+        else if (!strcmp(a, "-f")){
+            o->filesystem_dir = argv[++args.pos];
+        }
         else if (!strcmp(a, "-l")){
             o->local_repo = argv[++args.pos];
         }
@@ -132,12 +138,11 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
         usage(NULL,NULL);
         exit(FAILURE);
     }
-    else if (strcmp(o->repo_url, "") == 0 ^ strcmp(o->local_repo,"") != 0){
-        usage("Please provide a URL or local repo to clone",NULL);
-        exit(FAILURE);
+
+    else if ((strcmp(o->repo_url, "") == 0 ^ strcmp(o->local_repo,"") != 0) ^ strcmp(o->filesystem_dir,"") !=0)  {
+        usage("Unable to identify what you want me to scan",NULL);
     }
 
-    
 }
 
 int init(void) {
@@ -158,11 +163,16 @@ int main(int argc, char *argv[]) {
 	struct opts opts = { "", "", "","", 0, 0 };
 	parse_opts(&opts, argc, argv);
 
-    GitEngine git;
-    if(strcmp(opts.local_repo,"") != 0) {
+
+    if(strcmp(opts.filesystem_dir,"") != 0){
+        FilesystemEngine filesystem;
+        filesystem.start(opts.filesystem_dir);
+    }else if(strcmp(opts.local_repo,"") != 0) {
+        GitEngine git;
         LOG_DEBUG << "Local Repo location set to : " << opts.repo_url;
         git.local_start(opts.local_repo);
     }else{
+        GitEngine git;
         if (strcmp(opts.clone_dir, "") == 0) {
             usage("Please provide a directory to clone to", NULL);
             exit(FAILURE);

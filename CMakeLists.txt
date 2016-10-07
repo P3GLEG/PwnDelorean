@@ -37,6 +37,6 @@ INCLUDE_DIRECTORIES(${LIBGIT_INCLUDE_DIRS})
 
 INCLUDE_DIRECTORIES(${PWNDELOREAN_HEADERS})
 #ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES}/engine.cpp ${PWNDELOREAN_SOURCES}/gitengine.cpp ${PWNDELOREAN_SOURCES}/main.cpp)
-ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES})
+ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES} src/filesystemengine.cpp)
 #All these libraries are required by libgit2
 TARGET_LINK_LIBRARIES(pwndelorean stdc++fs re2 ${OPENSSL_LIBRARIES} Threads::Threads ${LIBGIT_SOURCE_DIR}/build/libgit2.a ssh2 z http_parser)
