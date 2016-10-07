@@ -143,7 +143,7 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
 int init(void) {
     static plog::RollingFileAppender<plog::CsvFormatter> fileAppender("debug.txt", 100000000, 3);
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    plog::init(plog::debug, &consoleAppender).addAppender(&fileAppender);
+    plog::init(plog::info, &consoleAppender).addAppender(&fileAppender);
     return SUCCESS;
 }
 

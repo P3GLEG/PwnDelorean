@@ -1,10 +1,10 @@
 #include "gitengine.h"
-#include "util.h"
 #include "engine.h"
-#define PATH_MAX 4096
 
+namespace fs = std::experimental::filesystem;
 Engine engine;
 git_repository *repo = NULL;
+
 std::map<std::string, bool> blobs;
 
 
@@ -104,31 +104,39 @@ int begin_rev_traverse(const char* head_rev){
     git_revwalk_free(walker);
 }
 
-int begin(const char *local_repo_dir){
-    char head_filepath[PATH_MAX];
+int traverse(std::string head_filepath){
     FILE *head_fileptr;
     char head_rev[41];
-    LOG_DEBUG << "Git repo saved at: " << git_repository_path(repo);
-    strcpy(head_filepath, git_repository_path(repo));
-    if(check_filepath_backslash_required(local_repo_dir)){
-        strcat(head_filepath, "/");
-        LOG_DEBUG <<"Replaced slash";
-    }
-    strcat(head_filepath, "refs/heads/master");
-    //TODO: Add different refs
-
-    if ((head_fileptr = fopen(head_filepath, "r")) == NULL) {
-        fprintf(stderr, "Error opening '%s'\n", head_filepath);
+    if ((head_fileptr = fopen(head_filepath.c_str(), "r")) == NULL) {
+        LOG_ERROR << "Error opening " << head_filepath.c_str();
         return FAILURE;
     }
     if (fread(head_rev, 40, 1, head_fileptr) != 1) {
-        fprintf(stderr, "Error reading from '%s'\n", head_filepath);
+        LOG_ERROR << "Error reading from " << head_filepath.c_str();
         fclose(head_fileptr);
         return FAILURE;
     }
     fclose(head_fileptr);
     LOG_DEBUG << "head rev set to :" << head_rev;
+    //TODO: Test threading here
     begin_rev_traverse(head_rev);
+    return SUCCESS;
+}
+int begin(const char *local_repo_dir) {
+
+    std::vector<std::string> branche_head_revs;
+    LOG_DEBUG << "Git repo saved at: " << git_repository_path(repo);
+   //TODO: Add different refs
+    fs::path remote_refs(git_repository_path(repo));
+    remote_refs /= "refs/remotes/";
+    for(auto& path: fs::directory_iterator(remote_refs)){
+           LOG_DEBUG << "Remote branch found :" << path ;
+        for(auto& rev_file: fs::directory_iterator(path.path())){
+            LOG_DEBUG << "Branch filename found :" << rev_file;
+            traverse(rev_file.path());
+        }
+    }
+
     git_repository_free(repo);
     git_libgit2_shutdown();
     return SUCCESS;
@@ -148,8 +156,6 @@ int GitEngine::local_start(const char *repo_location){
 
 int GitEngine::remote_start(const char *url,const char *clone_dir) {
     int error = 0;
-
-
     error = git_clone(&repo, url, clone_dir, NULL);
     if (error != 0) {
         //TODO: Prompt to continue if output_dir has repo already
