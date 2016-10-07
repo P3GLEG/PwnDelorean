@@ -44,13 +44,13 @@ const char *delorean =
  "              `\\<<<<>>>>/'                       `\\<<<<>>>>/'\n";
 
  const char *argument_list = 
-"\t-o Output Directory\n"
-"\t-o Local Git Directory\n"
+"\t-o Clone Directory\n"
+"\t-l Local Git Directory\n"
 "\t-u Remote Git Repo URL\n"
 "\t-iL List of Remote Git Repos\n";
 
 struct opts {
-	const char *output_dir;
+	const char *clone_dir;
     const char *repo_url;
     const char *local_repo; 
     const char *input_file;
@@ -110,17 +110,21 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
 	for (args.pos = 1; args.pos < argc; ++args.pos) {
 		char *a = argv[args.pos];
         if (!strcmp(a, "-o")){
-            o->output_dir = argv[++args.pos];
+            o->clone_dir = argv[++args.pos];
+        }
+        else if (!strcmp(a, "-l")){
+            o->local_repo = argv[++args.pos];
         }
         else if (!strcmp(a, "-u")){
             o->repo_url = argv[++args.pos];
-        }else if (!strcmp(a, "-iL")){
+        }
+        else if (!strcmp(a, "-iL")){
             o->input_file = argv[++args.pos];
         }
 		else if (!strcmp(a, "--help") || !strcmp(a, "-h")){
 			usage(NULL, NULL);
         }
-		else if (!match_str_arg(&o->output_dir, &args, "--fat")){
+		else if (!match_str_arg(&o->clone_dir, &args, "--rawr")){
 			usage("Unknown option", a);
         }
 	}
@@ -128,21 +132,18 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
         usage(NULL,NULL);
         exit(FAILURE);
     }
-    else if (strcmp(o->repo_url, "") == 0 && strcmp(o->local_repo,"") != 0){
-        usage("Please provide a URL to clone",NULL);
+    else if (strcmp(o->repo_url, "") == 0 ^ strcmp(o->local_repo,"") != 0){
+        usage("Please provide a URL or local repo to clone",NULL);
         exit(FAILURE);
     }
-    else if (strcmp(o->output_dir, "") == 0){
-        usage("Please provide an output directory to clone to",NULL);
-        exit(FAILURE);
-    }
+
     
 }
 
 int init(void) {
     static plog::RollingFileAppender<plog::CsvFormatter> fileAppender("debug.txt", 100000000, 3);
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    plog::init(plog::info, &consoleAppender).addAppender(&fileAppender);
+    plog::init(plog::debug, &consoleAppender).addAppender(&fileAppender);
     return SUCCESS;
 }
 
@@ -154,13 +155,23 @@ int main(int argc, char *argv[]) {
         LOG_ERROR << "Failed to initialize the program";
         exit(FAILURE);
     }
-	struct opts o = { "", "", "","", 0, 0 };
-	parse_opts(&o, argc, argv);
-    
-    LOG_DEBUG << "Output Directory set to : " << o.output_dir;
-    LOG_DEBUG << "Repo URL set to : " << o.repo_url;
+	struct opts opts = { "", "", "","", 0, 0 };
+	parse_opts(&opts, argc, argv);
+
     GitEngine git;
-    git.start(o.repo_url, o.output_dir);
+    if(strcmp(opts.local_repo,"") != 0) {
+        LOG_DEBUG << "Local Repo location set to : " << opts.repo_url;
+        git.local_start(opts.local_repo);
+    }else{
+        if (strcmp(opts.clone_dir, "") == 0) {
+            usage("Please provide a directory to clone to", NULL);
+            exit(FAILURE);
+        }
+        LOG_DEBUG << "Repo URL set to : " << opts.repo_url;
+        LOG_DEBUG << "Clone Directory set to : " << opts.clone_dir;
+        git.remote_start(opts.repo_url, opts.clone_dir);
+    }
     return SUCCESS;
+
 }
 

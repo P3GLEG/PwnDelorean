@@ -21,8 +21,9 @@ extern "C" {
 class GitEngine {
 
 public:
-    int start(const char *url, const char* output_dir);
-
+    GitEngine(void);
+    int remote_start(const char *url, const char* clone_dir);
+    int local_start(const char *repo_location);
 };
 
 

@@ -1,11 +1,17 @@
 #include "gitengine.h"
 #include "util.h"
 #include "engine.h"
-
+#define PATH_MAX 4096
 
 Engine engine;
 git_repository *repo = NULL;
 std::map<std::string, bool> blobs;
+
+
+GitEngine::GitEngine(void) {
+git_libgit2_init();
+    engine.Init();
+}
 
 void print_git_error() {
     LOG_ERROR << giterr_last()->message;
@@ -98,23 +104,15 @@ int begin_rev_traverse(const char* head_rev){
     git_revwalk_free(walker);
 }
 
-
-int GitEngine::start(const char *url,const char *output_dir ) {
-    int error = 0;
-    char head_filepath[512];
+int begin(const char *local_repo_dir){
+    char head_filepath[PATH_MAX];
     FILE *head_fileptr;
     char head_rev[41];
-    git_libgit2_init();
-    engine.Init();
-    error = git_clone(&repo, url, output_dir, NULL);
-    if (error != 0) {
-        LOG_DEBUG << "Repo has previously been cloned into " << output_dir; 
-        git_repository_open(&repo, output_dir);
-    }
-    LOG_VERBOSE << "Git repo saved at: " << git_repository_path(repo);
+    LOG_DEBUG << "Git repo saved at: " << git_repository_path(repo);
     strcpy(head_filepath, git_repository_path(repo));
-    if(check_filepath_backslash_required(output_dir)){
+    if(check_filepath_backslash_required(local_repo_dir)){
         strcat(head_filepath, "/");
+        LOG_DEBUG <<"Replaced slash";
     }
     strcat(head_filepath, "refs/heads/master");
     //TODO: Add different refs
@@ -129,11 +127,38 @@ int GitEngine::start(const char *url,const char *output_dir ) {
         return FAILURE;
     }
     fclose(head_fileptr);
+    LOG_DEBUG << "head rev set to :" << head_rev;
     begin_rev_traverse(head_rev);
     git_repository_free(repo);
     git_libgit2_shutdown();
     return SUCCESS;
 }
+
+int GitEngine::local_start(const char *repo_location){
+    int error = 0;
+    error = git_repository_open(&repo, repo_location);
+    if (error != 0) {
+        LOG_FATAL << "Unable to find locat repository at :" << repo_location;
+        return FAILURE;
+    }
+    LOG_DEBUG << "Opened local repository at :" << repo_location;
+    begin(repo_location);
+    return SUCCESS;
+}
+
+int GitEngine::remote_start(const char *url,const char *clone_dir) {
+    int error = 0;
+
+
+    error = git_clone(&repo, url, clone_dir, NULL);
+    if (error != 0) {
+        //TODO: Prompt to continue if output_dir has repo already
+        LOG_FATAL << "Unable to clone repo due to network error! Or previously been cloned into " << clone_dir;
+        return FAILURE;
+    }
+    return begin(clone_dir);
+}
+
 
  
 
