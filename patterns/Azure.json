@@ -2,12 +2,12 @@
   {
     "description": "Azure storage standard key format",
     "type": "fileContent",
-    "regex": "[A-Za-z0-9/+-]{86}=="
+    "regex": "[A-Za-z0-9/+-]{86}"
   },
   {
     "description": "Azure service bus standard key format",
     "type": "fileContent",
-    "regex": "[A-Za-z0-9/+-]{43}="
+    "regex": "[A-Za-z0-9/+-]{43}"
   },
   {
     "description": "Azure service configuration file",
