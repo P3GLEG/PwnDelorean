@@ -21,7 +21,7 @@
   },
   {
     "description": "Potential MSBuild publish profile",
-    "type":"fileContent",
-    "regex": "\\A*\\.pubxml(\\.user)?\\z"
+    "type":"secretFilename",
+    "regex": "\\.pubxml(\\.user)?$"
   }
 ]

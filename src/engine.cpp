@@ -15,6 +15,7 @@ int Engine::read_patterns_dir(void) {
     patterns_dir += fs::current_path();
     patterns_dir += "/patterns";
     for (auto &p : fs::directory_iterator(patterns_dir)) {
+        LOG_DEBUG << p.path().string(); 
         std::ifstream jsonfile(p.path().string());
         json j;
         jsonfile >> j;
@@ -32,15 +33,17 @@ int Engine::read_patterns_dir(void) {
         }
         jsonfile.close();
     }
-    if (!filenames_regexes.Compile() | !content_regexes.Compile()) {
-        LOG_ERROR << "Error while compiling regexes";
-        return FAILURE;
-    }
+    
     return SUCCESS;
 }
 
 void Engine::Init(void) {
+    LOG_DEBUG << "Reving Engine...";
     read_patterns_dir();
+    if (!filenames_regexes.Compile() | !content_regexes.Compile()) {
+        LOG_ERROR << "Error while compiling regexes";
+        exit(FAILURE);
+    }
 }
 
 

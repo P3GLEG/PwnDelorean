@@ -22,12 +22,13 @@
     {
       "description": "MySQL client command history file",
       "type": "secretFilename",
-      "regex": "\\A\\.?mysql_history\\z"
+      "regex": "[\\s\\S]*mysql_history"
     },
     {
       "description": "PostgreSQL client command history file",
       "type": "secretFilename",
-      "regex": "\\A\\.?psql_history\\z"
+      "regex": "[\\s\\S]*psql_history"
+
     },
     {
       "description": "DBeaver SQL database manager configuration file",
