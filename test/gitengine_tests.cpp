@@ -4,16 +4,17 @@
 class GitEngineTests: public ::testing::Test {
     protected: 
         virtual void SetUp(){
+            git.remote_start("https://github.com/pegleg2060/PwnDeloreanTestRepo.git", "/tmp/pwndeloreantests");
         }
         virtual void TearDown(){
             system("rm -r /tmp/pwndeloreantests");
         }
-    GitEngine git;
+
+        GitEngine git;
 };
 
 
 TEST_F(GitEngineTests, RealisticFileNamesGitEngine) {
-        git.remote_start("https://github.com/pegleg2060/PwnDeloreanTestRepo.git", "/tmp/pwndeloreantests");
         ASSERT_NE(git.engine.filename_matches.count("prod.pfx"),0);
         ASSERT_NE(git.engine.filename_matches.count("test.cscfg"),0);
         ASSERT_NE(git.engine.filename_matches.count("doesntmatter.pubxml"),0);
@@ -72,5 +73,12 @@ TEST_F(GitEngineTests, RealisticFileNamesGitEngine) {
         ASSERT_NE(git.engine.filename_matches.count("ssh_config"),0);
         ASSERT_NE(git.engine.filename_matches.count("sshd_config"),0);
 
+        //On a different branch
+        ASSERT_NE(git.engine.filename_matches.count("yay.pfx"),0);
+        ASSERT_NE(git.engine.filename_matches.count("yay.cscfg"),0);
+        ASSERT_NE(git.engine.filename_matches.count("yay.pubxml"),0);
+        ASSERT_NE(git.engine.filename_matches.count("yay.password"),0);
+        ASSERT_NE(git.engine.filename_matches.count("yayid_rsa"),0);
+        
 }
 
