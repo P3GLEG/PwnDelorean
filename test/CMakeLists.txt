@@ -41,7 +41,7 @@ INCLUDE_DIRECTORIES(${LIBGIT_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${PWNDELOREAN_HEADERS})
 INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIR})
 
-add_executable(runTests engine_tests.cpp)
+add_executable(runTests all_tests.cpp gitengine_tests.cpp engine_tests.cpp ../src/engine.cpp ../src/gitengine.cpp )
 target_link_libraries(runTests ${GTEST_SOURCE_DIR}/build/libgtest.a stdc++fs re2 ${OPENSSL_LIBRARIES} Threads::Threads ${LIBGIT_SOURCE_DIR}/build/libgit2.a ssh2 z http_parser)
 
 #ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES})

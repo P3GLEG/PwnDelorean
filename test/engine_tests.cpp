@@ -1,4 +1,4 @@
-#include "../src/engine.cpp"
+#include "../src/engine.h"
 #include <gtest/gtest.h>
 class EngineTests: public ::testing::Test {
     protected: 
@@ -10,7 +10,6 @@ class EngineTests: public ::testing::Test {
 };
 
 TEST_F(EngineTests, BasicSecrets) {
-    e.Init(); //Only call the initialize once or there will be dragons
     ASSERT_TRUE(e.search_for_content_match("password", 1, "/cleartextpassword", ""));
     ASSERT_TRUE(e.search_for_content_match("credential", 1, "/cleartextcredential", ""));
     ASSERT_TRUE(e.search_for_content_match("abcdefghijklmonpqrstyvxzABCDEFGHIJKLMONPQRS==", 1, "/azurekey", ""));
@@ -83,8 +82,3 @@ TEST_F(EngineTests,RealisticFileNames) {
     ASSERT_TRUE(e.search_for_filename_match("sshd_config",""));
 }
  
- 
-int main(int argc, char **argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

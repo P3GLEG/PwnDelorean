@@ -1,3 +1,5 @@
+#ifndef __ENGINE__
+#define __ENGINE__
 #include <re2.h>
 #include <re2/set.h>
 #include <string>
@@ -29,9 +31,10 @@ public:
     std::map<std::string, piston> content_matches;
 
     void Init(void);
-    void Shutdown();
+    void output_matches();
 
 private:
     int read_patterns_dir(void);
 
 };
+#endif

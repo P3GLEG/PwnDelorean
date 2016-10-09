@@ -55,7 +55,7 @@ void Engine::Init(void) {
     //TODO:Add check here for if you only want secretfilenames vs content
 }
 
-void Engine::Shutdown(void){
+void Engine::output_matches(void){
 
     for (auto i: filename_matches) {
         piston temp = i.second;

@@ -1,16 +1,14 @@
-#include "filesystemengine.h"
 #include "gitengine.h"
 
 namespace fs = std::experimental::filesystem;
-Engine engine;
 git_repository *repo = NULL;
 
 std::map<std::string, bool> blobs;
-
-
+Engine* e;
 GitEngine::GitEngine(void) {
 git_libgit2_init();
-    engine.Init();
+    this->engine.Init();
+    e = &this->engine;
 }
 
 void print_git_error() {
@@ -24,7 +22,7 @@ void parse_blob(const git_blob *blob, std::string filename, std::string oid) {
         std::string line;
         int line_number = 0;
         while (std::getline(ss, line, '\n')) {
-            engine.search_for_content_match(line ,line_number, filename, oid);
+            e->search_for_content_match(line ,line_number, filename, oid);
             line_number++;
         }
     }
@@ -44,7 +42,7 @@ void parse_tree_entry(const git_tree_entry *entry) {
             } else {
                 //TODO: Add oidstr to output
                 parse_blob((const git_blob *) blob, filename, oidstr);
-                engine.search_for_filename_match(filename, oidstr);
+                e->search_for_filename_match(filename, oidstr);
                 blobs[oidstr] = true;
             }
         }
@@ -133,9 +131,9 @@ int begin(const char *local_repo_dir) {
             traverse_head_branch(rev_file.path());
         }
     }
+    e->output_matches();
     git_repository_free(repo);
     git_libgit2_shutdown();
-    engine.Shutdown();
     return SUCCESS;
 }
 
