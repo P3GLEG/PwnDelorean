@@ -15,12 +15,13 @@ void print_git_error() {
     LOG_ERROR << giterr_last()->message;
 }
 
-void parse_blob(const git_blob *blob, std::string filename, std::string oid) {
+void parse_blob(const git_blob *blob, std::string filename, std::string oid, std::string root_path) {
     std::string temp((const char *) git_blob_rawcontent(blob), (size_t) git_blob_rawsize(blob));
     if (!temp.empty()) {
         std::stringstream ss(temp);
         std::string line;
         int line_number = 0;
+        filename+=root_path;
         while (std::getline(ss, line, '\n')) {
             e->search_for_content_match(line ,line_number, filename, oid);
             line_number++;
@@ -28,7 +29,7 @@ void parse_blob(const git_blob *blob, std::string filename, std::string oid) {
     }
 }
 
-void parse_tree_entry(const git_tree_entry *entry) {
+void parse_tree_entry(const char* root_path, const git_tree_entry *entry) {
     git_otype type = git_tree_entry_type(entry);
     switch (type) {
         case GIT_OBJ_BLOB: {
@@ -41,8 +42,8 @@ void parse_tree_entry(const git_tree_entry *entry) {
                 LOG_DEBUG << "Already parsed file: " << filename << oidstr;
             } else {
                 //TODO: Add oidstr to output
-                parse_blob((const git_blob *) blob, filename, oidstr);
-                e->search_for_filename_match(filename, oidstr);
+                parse_blob((const git_blob *) blob, filename, oidstr, root_path);
+                e->search_for_filename_match(filename, oidstr, root_path);
                 blobs[oidstr] = true;
             }
         }
@@ -54,7 +55,7 @@ void parse_tree_entry(const git_tree_entry *entry) {
 }
 
 int tree_walk_cb(const char *root, const git_tree_entry *entry, void *payload) {
-    parse_tree_entry(entry);
+    parse_tree_entry(root, entry);
     return SUCCESS;
 }
 

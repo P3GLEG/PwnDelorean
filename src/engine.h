@@ -35,7 +35,7 @@ class Engine {
 public:
     bool search_for_content_match(std::string line, int linenumber, std::string path, std::string oid);
 
-    bool search_for_filename_match(std::string filename, std::string oid);
+    bool search_for_filename_match(std::string filename, std::string oid, std::string root_path);
 
 
 

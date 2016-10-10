@@ -16,7 +16,7 @@ void FilesystemEngine::start(std::string dir_to_scan) {
         LOG_DEBUG << "Scanning in Directory: " << path.path().generic_string();
             if(!fs::is_directory(path.path())) {
                 LOG_DEBUG << "filename found :" << path.path().generic_string();
-                e1->search_for_filename_match(path.path(), "");
+                e1->search_for_filename_match(path.path(), "", "");
                 std::ifstream file(path.path());
                 int line_number = 1;
                 if (file) {

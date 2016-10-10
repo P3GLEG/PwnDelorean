@@ -10,14 +10,13 @@ RE2::Set filenames_regexes(RE2::DefaultOptions, RE2::UNANCHORED);
 RE2::Set content_regexes(RE2::DefaultOptions, RE2::UNANCHORED);
 std::vector<std::string> filename_regexes_cache;
 std::vector<std::string> content_regexes_cache;
-std::map<std::string, piston> filename_matches;
-std::map<std::string, piston> content_matches;
 std::string *error_holder = NULL;
 UErrorCode errorcheck = U_ZERO_ERROR;
-const Normalizer2 *normalizer = Normalizer2::getNFDInstance(errorcheck);
+const Normalizer2 *normalizer = Normalizer2::getNFKCInstance(errorcheck);
 
-std::string normalize_string(std::string str){
-    const icu::UnicodeString temp(str.c_str()) ;
+std::string normalize_and_lower_string(std::string str){
+    icu::UnicodeString temp(str.c_str()) ;
+    temp.toLower();
     normalizer->normalize(temp,errorcheck);
     return temp.toUTF8String(str);
 }
@@ -35,7 +34,7 @@ int Engine::read_patterns_dir(void) {
         //However needed to compile regexes for speed
         for (json::iterator it = j.begin(); it != j.end(); ++it) {
             std::string regex = it.value()["regex"];
-            normalize_string(regex);
+            normalize_and_lower_string(regex);
             if (it.value()["type"] == "secretFilename") {
                 LOG_DEBUG << "Filename Regex : " << regex;
 
@@ -66,9 +65,6 @@ void Engine::Init(void) {
     //TODO:Add check here for if you only want secretfilenames vs content
 }
 
-void grepable_format(void){
-
-}
 void Engine::output_matches(void){
     json filejarray;
     json contentjarray;
@@ -76,8 +72,9 @@ void Engine::output_matches(void){
     for (auto i: filename_matches) {
         json tempo;
         piston temp = i.second;
-        tempo[FILENAME] = temp.line_matched;
+        tempo[FILENAME] = temp.path_to_file + temp.line_matched;
         tempo[OID] = temp.oid;
+
         //TODO:Description
         filejarray.push_back(tempo);
         grep << temp.line_matched << " " << temp.oid << "\n";
@@ -104,7 +101,7 @@ void Engine::output_matches(void){
 
 
 bool Engine::search_for_content_match(std::string line, int line_number, std::string path, std::string oid) {
-    normalize_string(line);
+    normalize_and_lower_string(line);
     if (content_matches.count(line) > 0) {
         //Already found this no need to do work again
         LOG_DEBUG << "Attempted to parse " << line << " again";
@@ -129,8 +126,8 @@ bool Engine::search_for_content_match(std::string line, int line_number, std::st
     return false;
 }
 
-bool Engine::search_for_filename_match(std::string filename, std::string oid) {
-    normalize_string(filename);
+bool Engine::search_for_filename_match(std::string filename, std::string oid, std::string root_path) {
+    normalize_and_lower_string(filename);
     if (filename_matches.count(filename) > 0) {
         //Already found this no need to do work again
         LOG_DEBUG << "Attempted to parse " << filename << " again";
@@ -145,6 +142,7 @@ bool Engine::search_for_filename_match(std::string filename, std::string oid) {
         }
         temp.oid = oid;
         temp.line_matched = filename;
+        temp.path_to_file = root_path;
         filename_matches[filename] = temp;
         //Fast finish, if you want to add which regex was matched do it here
         return true;
