@@ -7,7 +7,9 @@
 #include "../deps/json/src/json.hpp"
 #include <plog/Log.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
-
+#include <unicode/normalizer2.h>
+#include <fstream>
+#include <iostream>
 
 #define FILENAME "filename"
 #define OID "sha1"

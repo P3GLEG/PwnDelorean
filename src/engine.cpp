@@ -1,6 +1,10 @@
 #include <fstream>
+#include <iostream>
 #include "engine.h"
 #include "util.h"
+#include <unicode/ustream.h>
+
+    
 
 RE2::Set filenames_regexes(RE2::DefaultOptions, RE2::UNANCHORED);
 RE2::Set content_regexes(RE2::DefaultOptions, RE2::UNANCHORED);
@@ -9,7 +13,14 @@ std::vector<std::string> content_regexes_cache;
 std::map<std::string, piston> filename_matches;
 std::map<std::string, piston> content_matches;
 std::string *error_holder = NULL;
+UErrorCode errorcheck = U_ZERO_ERROR;
+const Normalizer2 *normalizer = Normalizer2::getNFDInstance(errorcheck);
 
+std::string normalize_string(std::string str){
+    const icu::UnicodeString temp(str.c_str()) ;
+    normalizer->normalize(temp,errorcheck);
+    return temp.toUTF8String(str);
+}
 
 int Engine::read_patterns_dir(void) {
     fs::path patterns_dir;
@@ -24,8 +35,10 @@ int Engine::read_patterns_dir(void) {
         //However needed to compile regexes for speed
         for (json::iterator it = j.begin(); it != j.end(); ++it) {
             std::string regex = it.value()["regex"];
+            normalize_string(regex);
             if (it.value()["type"] == "secretFilename") {
                 LOG_DEBUG << "Filename Regex : " << regex;
+
                 if(filenames_regexes.Add(regex, error_holder) != FAILURE){
                     filename_regexes_cache.push_back(regex);
                 };
@@ -53,17 +66,21 @@ void Engine::Init(void) {
     //TODO:Add check here for if you only want secretfilenames vs content
 }
 
+void grepable_format(void){
+
+}
 void Engine::output_matches(void){
     json filejarray;
     json contentjarray;
+    std::ofstream grep("grep.txt");
     for (auto i: filename_matches) {
         json tempo;
         piston temp = i.second;
-        //LOG_INFO << "Filename match: " << temp.line_matched << " " << temp.oid ;
         tempo[FILENAME] = temp.line_matched;
         tempo[OID] = temp.oid;
         //TODO:Description
         filejarray.push_back(tempo);
+        grep << temp.line_matched << " " << temp.oid << "\n";
     }
     for (auto i: content_matches) {
         piston temp = i.second;
@@ -73,16 +90,21 @@ void Engine::output_matches(void){
         tempo[LINENUMBER] = temp.linenumber;
         tempo[REGEXES] = temp.regexes_matched;
         tempo[OID] = temp.oid;
-        filejarray.push_back(tempo);
+        contentjarray.push_back(tempo);
         //TODO:Description
-        //LOG_INFO<<"[" <<temp.path_to_file << "] Content match: " << i.first << " found by: " << temp.regexes_matched[0] << " " << temp.oid;
     }
-    std::cout << filejarray.dump(4) << "\n";
-    std::cout << contentjarray.dump(4) << "\n";
+    grep.close();
+    if(!filejarray.empty()) {
+        std::cout << filejarray.dump(4) << "\n";
+    }
+    if(!contentjarray.empty()) {
+        std::cout << contentjarray.dump(4) << "\n";
+    }
 }
 
 
 bool Engine::search_for_content_match(std::string line, int line_number, std::string path, std::string oid) {
+    normalize_string(line);
     if (content_matches.count(line) > 0) {
         //Already found this no need to do work again
         LOG_DEBUG << "Attempted to parse " << line << " again";
@@ -108,6 +130,7 @@ bool Engine::search_for_content_match(std::string line, int line_number, std::st
 }
 
 bool Engine::search_for_filename_match(std::string filename, std::string oid) {
+    normalize_string(filename);
     if (filename_matches.count(filename) > 0) {
         //Already found this no need to do work again
         LOG_DEBUG << "Attempted to parse " << filename << " again";

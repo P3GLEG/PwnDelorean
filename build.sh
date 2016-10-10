@@ -13,3 +13,5 @@ mkdir build
 cd build
 cmake ..
 make
+#Need unicode support blame C++
+apt-get install libicu-dev

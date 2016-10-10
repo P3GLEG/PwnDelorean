@@ -8,8 +8,8 @@ set(LIBGIT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../deps/libgit2)
 set(LIBGIT_INCLUDE_DIR ${LIBGIT_SOURCE_DIR}/../include)
 set(PLOG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../deps/plog/include)
 set(RE2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../deps/re2/re2)
-set(GTEST_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../deps/googletest/googletest)
-set(GTEST_INCLUDE_DIR ${GTEST_SOURCE_DIR}/include)
+set(GTEST_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../deps/googletest/build/googlemock/gtest)
+set(GTEST_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../deps/googletest/googletest/include)
 
 #message("Include: ${GTEST_INCLUDE_DIR}")
 
@@ -42,7 +42,7 @@ INCLUDE_DIRECTORIES(${PWNDELOREAN_HEADERS})
 INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIR})
 
 add_executable(runTests all_tests.cpp gitengine_tests.cpp engine_tests.cpp ../src/engine.cpp ../src/gitengine.cpp )
-target_link_libraries(runTests ${GTEST_SOURCE_DIR}/build/libgtest.a stdc++fs re2 ${OPENSSL_LIBRARIES} Threads::Threads ${LIBGIT_SOURCE_DIR}/build/libgit2.a ssh2 z http_parser)
+target_link_libraries(runTests ${GTEST_SOURCE_DIR}/libgtest.a stdc++fs re2 ${OPENSSL_LIBRARIES} Threads::Threads ${LIBGIT_SOURCE_DIR}/build/libgit2.a ssh2 z http_parser)
 
 #ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES})
 #All these libraries are required by libgit2
