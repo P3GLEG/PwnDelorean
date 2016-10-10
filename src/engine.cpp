@@ -2,8 +2,6 @@
 #include "engine.h"
 #include "util.h"
 
-
-
 RE2::Set filenames_regexes(RE2::DefaultOptions, RE2::UNANCHORED);
 RE2::Set content_regexes(RE2::DefaultOptions, RE2::UNANCHORED);
 std::vector<std::string> filename_regexes_cache;
@@ -56,15 +54,31 @@ void Engine::Init(void) {
 }
 
 void Engine::output_matches(void){
-
+    json filejarray;
+    json contentjarray;
     for (auto i: filename_matches) {
+        json tempo;
         piston temp = i.second;
-        LOG_INFO << "Filename match: " << temp.line_matched << " " << temp.oid ;
+        //LOG_INFO << "Filename match: " << temp.line_matched << " " << temp.oid ;
+        tempo[FILENAME] = temp.line_matched;
+        tempo[OID] = temp.oid;
+        //TODO:Description
+        filejarray.push_back(tempo);
     }
     for (auto i: content_matches) {
         piston temp = i.second;
-        LOG_INFO<<"[" <<temp.path_to_file << "] Content match: " << i.first << " found by: " << temp.regexes_matched[0] << " " << temp.oid;
+        json tempo;
+        tempo[SECRET] = i.first;
+        tempo[FILENAME] = temp.path_to_file;
+        tempo[LINENUMBER] = temp.linenumber;
+        tempo[REGEXES] = temp.regexes_matched;
+        tempo[OID] = temp.oid;
+        filejarray.push_back(tempo);
+        //TODO:Description
+        //LOG_INFO<<"[" <<temp.path_to_file << "] Content match: " << i.first << " found by: " << temp.regexes_matched[0] << " " << temp.oid;
     }
+    std::cout << filejarray.dump(4) << "\n";
+    std::cout << contentjarray.dump(4) << "\n";
 }
 
 

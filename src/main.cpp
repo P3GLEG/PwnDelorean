@@ -49,7 +49,10 @@ const char *delorean =
 "\t-l Local Git Directory\n"
 "\t-u Remote Git Repo URL\n"
 "\t-f Scan Filesystem Location\n"
-"\t-iL List of Remote Git Repos\n";
+"\t-iL List of Remote Git Repos\n"
+"\t-v Log Verbosity 1-4\n"
+
+;
 
 struct opts {
     const char *filesystem_dir;
@@ -57,6 +60,7 @@ struct opts {
     const char *repo_url;
     const char *local_repo; 
     const char *input_file;
+    const char *verbosity;
 	int action;
 	int verbose;
 };
@@ -127,6 +131,9 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
         else if (!strcmp(a, "-iL")){
             o->input_file = argv[++args.pos];
         }
+        else if (!strcmp(a, "-v")){
+            o->verbosity = argv[++args.pos];
+        }
 		else if (!strcmp(a, "--help") || !strcmp(a, "-h")){
 			usage(NULL, NULL);
         }
@@ -160,10 +167,11 @@ int main(int argc, char *argv[]) {
         LOG_ERROR << "Failed to initialize the program";
         exit(FAILURE);
     }
-	struct opts opts = { "", "", "","", 0, 0 };
+	struct opts opts = { "", "", "","", "", "", 0, 0, };
 	parse_opts(&opts, argc, argv);
-
-
+    if(strcmp(opts.verbosity,"") !=0){
+        plog::get()->setMaxSeverity(plog::debug);
+    }
     if(strcmp(opts.filesystem_dir,"") != 0){
         FilesystemEngine filesystem;
         filesystem.start(opts.filesystem_dir);
