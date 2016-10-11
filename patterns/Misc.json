@@ -215,7 +215,7 @@
   },
   {
     "type": "secretFilename",
-    "regex": "dayone",
+    "regex": "dayone.*",
     "description": "Day One journal file"
   },
   {
@@ -240,7 +240,7 @@
   },
   {
     "type": "secretFilename",
-    "regex": "knife.rb",
+    "regex": "knife*.rb",
     "description": "Chef Knife configuration file"
   },
   {
@@ -286,57 +286,57 @@
   {
     "type": "fileContent",
     "description": "Maybe a username",
-    "regex": "user*"
+    "regex": "user.*"
   },
   {
     "type": "fileContent",
     "description": "Maybe a username",
-    "regex": "username*"
+    "regex": "username.*"
   },
   {
     "description": "sql query",
     "type": "fileContent",
-    "regex": "select*"
+    "regex": "select.*"
   },
   {
     "description": "sql query",
     "type": "fileContent",
-    "regex": "update*"
+    "regex": "update.*"
   },
   {
     "description": "sql query",
     "type": "fileContent",
-    "regex": "delete*"
+    "regex": "delete.*"
   },
   {
     "description": "social security #",
     "type": "fileContent",
-    "regex": "ssn*"
+    "regex": "ssn.*"
   },
   {
     "description": "possible PII",
     "type": "fileContent",
-    "regex": "dob*"
+    "regex": "dob.*"
   },
   {
     "description": "possible PII",
     "type": "fileContent",
-    "regex": "ccn*"
+    "regex": "ccn.*"
   },
   {
     "description": "admin account?",
     "type": "fileContent",
-    "regex": "administrator*"
+    "regex": "administrator.*"
   },
   {
     "description": "What is?",
     "type": "fileContent",
-    "regex": "secret*"
+    "regex": "secret.*"
   },
   {
     "description": "It could open a door",
     "type": "fileContent",
-    "regex": "key*"
+    "regex": "key.*"
   },
   {
     "description": "Github Dev API key",
@@ -346,6 +346,6 @@
   {
     "description": "DHCP server configs",
     "type": "secretFilename",
-    "regex": "dhcpd.conf"
+    "regex": "dhcpd*.conf"
   }
 ]

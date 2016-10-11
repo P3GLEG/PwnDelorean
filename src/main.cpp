@@ -50,7 +50,7 @@ const char *delorean =
 "\t-u Remote Git Repo URL\n"
 "\t-f Scan Filesystem Location\n"
 "\t-iL List of Remote Git Repos\n"
-"\t-v Log Verbosity 1-4\n"
+"\t-v Log Verbosity 1-6\n"
 
 ;
 
@@ -62,7 +62,6 @@ struct opts {
     const char *input_file;
     const char *verbosity;
 	int action;
-	int verbose;
 };
 
 struct args_info {
@@ -155,7 +154,7 @@ void parse_opts(struct opts *o, int argc, char *argv[]){
 int init(void) {
     static plog::RollingFileAppender<plog::CsvFormatter> fileAppender("debug.txt", 100000000, 3);
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    plog::init(plog::debug, &consoleAppender).addAppender(&fileAppender);
+    plog::init(plog::warning, &consoleAppender).addAppender(&fileAppender);
     return SUCCESS;
 }
 
@@ -167,10 +166,33 @@ int main(int argc, char *argv[]) {
         LOG_ERROR << "Failed to initialize the program";
         exit(FAILURE);
     }
-	struct opts opts = { "", "", "","", "", "", 0, 0, };
+	struct opts opts = { "", "", "","", "", "", 0};
 	parse_opts(&opts, argc, argv);
     if(strcmp(opts.verbosity,"") !=0){
-        plog::get()->setMaxSeverity(plog::debug);
+        int log_level = atoi(opts.verbosity);
+        switch(log_level){
+            case 1:
+                plog::get()->setMaxSeverity(plog::fatal);
+                break;
+            case 2:
+                plog::get()->setMaxSeverity(plog::error);
+                break;
+            case 3:
+                plog::get()->setMaxSeverity(plog::warning);
+                break;
+            case 4:
+                plog::get()->setMaxSeverity(plog::info);
+                break;
+            case 5:
+                plog::get()->setMaxSeverity(plog::debug);
+                break;
+            case 6:
+                plog::get()->setMaxSeverity(plog::verbose);
+                break;
+            default:
+                LOG_ERROR << "Unable to set verbosity to :" << opts.verbosity;
+                exit(FAILURE);
+        }
     }
     if(strcmp(opts.filesystem_dir,"") != 0){
         FilesystemEngine filesystem;

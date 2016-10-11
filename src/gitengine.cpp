@@ -1,4 +1,6 @@
+#include <deque>
 #include "gitengine.h"
+#include "../deps/libgit2/include/git2/diff.h"
 
 namespace fs = std::experimental::filesystem;
 git_repository *repo = NULL;
@@ -21,9 +23,9 @@ void parse_blob(const git_blob *blob, std::string filename, std::string oid, std
         std::stringstream ss(temp);
         std::string line;
         int line_number = 0;
-        filename+=root_path;
+        root_path+=filename;
         while (std::getline(ss, line, '\n')) {
-            e->search_for_content_match(line ,line_number, filename, oid);
+            e->search_for_content_match(line ,line_number, root_path, oid);
             line_number++;
         }
     }
@@ -41,9 +43,12 @@ void parse_tree_entry(const char* root_path, const git_tree_entry *entry) {
             if (blobs[oidstr]) { // We can assume that the SHA1 hash has already been found previously
                 LOG_DEBUG << "Already parsed file: " << filename << oidstr;
             } else {
-                //TODO: Add oidstr to output
-                parse_blob((const git_blob *) blob, filename, oidstr, root_path);
                 e->search_for_filename_match(filename, oidstr, root_path);
+                if(git_blob_is_binary((const git_blob *)blob) == 1){
+                    LOG_DEBUG << "Binary file found:" << filename;
+                }else{
+                    parse_blob((const git_blob *) blob, filename, oidstr, root_path);
+                }
                 blobs[oidstr] = true;
             }
         }
@@ -79,24 +84,20 @@ int begin_rev_traverse(const char* head_rev){
     git_oid oid;
     git_revwalk *walker;
     git_commit *commit;
-
     if (git_oid_fromstr(&oid, head_rev) != 0) {
         fprintf(stderr, "Invalid git object: '%s'\n", head_rev);
         return FAILURE;
     }
-
     git_revwalk_new(&walker, repo);
     git_revwalk_sorting(walker, GIT_SORT_TOPOLOGICAL);
     git_revwalk_push(walker, &oid);
     while (git_revwalk_next(&oid, walker) == 0) {
         if (git_commit_lookup(&commit, repo, &oid)) {
             fprintf(stderr, "Failed to lookup the next object\n");
-            return FAILURE;
         }
         parse_commit_tree(repo, commit);
         git_commit_free(commit);
     }
-
     git_revwalk_free(walker);
 }
 
