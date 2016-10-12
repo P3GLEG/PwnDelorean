@@ -25,6 +25,11 @@
     "regex": "accounts[\\s\\S]*.xml"
   },
   {
+    "description": "Wordpress configuration file",
+    "type": "secretFilename",
+    "regex": "wp-config[\\s\\S]*.php"
+  },
+  {
     "description": "Hexchat/XChat IRC client server list configuration file",
     "type": "secretFilename",
     "regex": ".?xchat2[\\s\\S]*.conf"
