@@ -13,3 +13,6 @@
 [submodule "deps/googletest"]
 	path = deps/googletest
 	url = https://github.com/google/googletest.git
+[submodule "deps/Shark"]
+	path = deps/Shark
+	url = https://github.com/Shark-ML/Shark.git
