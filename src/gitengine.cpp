@@ -196,8 +196,6 @@ int begin(const char *local_repo_dir) {
         }
     }
     e->output_matches();
-    git_repository_free(repo);
-    git_libgit2_shutdown();
     return SUCCESS;
 }
 
@@ -210,6 +208,8 @@ int GitEngine::local_start(const char *repo_location){
     }
     LOG_DEBUG << "Opened local repository at :" << repo_location;
     begin(repo_location);
+    git_repository_free(repo);
+    git_libgit2_shutdown();
     return SUCCESS;
 }
 
@@ -233,6 +233,7 @@ int GitEngine::remote_start(const char *url,const char *clone_dir) {
     }
     begin(clone_dir);
     git_repository_free(repo);
+    git_libgit2_shutdown();
     return SUCCESS;
 }
 

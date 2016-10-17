@@ -1,7 +1,7 @@
 #ifndef __ENGINE__
 #define __ENGINE__
 #include <re2.h>
-#include <re2/set.h>
+#include <set.h>
 #include <string>
 #include <experimental/filesystem>
 #include "../deps/json/src/json.hpp"

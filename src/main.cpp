@@ -8,7 +8,7 @@ extern "C" {
 #include <map>
 #include <fstream>
 #include <re2.h>
-#include <re2/set.h>
+#include <set.h>
 #include "gitengine.h"
 #include "util.h"
 #include "filesystemengine.h"
