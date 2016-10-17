@@ -1,5 +1,6 @@
 CURDIR=`pwd`
 git submodule update --init --recursive
+apt-get install cmake libicu-dev libssl-dev pkg-config -y
 mkdir -p $CURDIR/deps/libgit2/build
 cd $CURDIR/deps/libgit2/build
 cmake -DTHREADSAFE=ON -DBUILD_CLAR=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="RelWithDebInfo" -DCMAKE_INSTALL_PREFIX=../install -DCURL=OFF .. && cmake --build .
@@ -14,4 +15,3 @@ cd build
 cmake ..
 make
 #Need unicode support blame C++
-apt-get install libicu-dev
