@@ -25,6 +25,13 @@ int Engine::read_patterns_dir(void) {
     fs::path patterns_dir;
     patterns_dir += fs::current_path();
     patterns_dir += "/patterns";
+    if(!fs::exists(patterns_dir)){
+        patterns_dir = "/usr/share/PwnDelorean/patterns";
+        if(!fs::exists(patterns_dir)){
+           LOG_ERROR << "Unable to locate pattern directory";
+           return FAILURE; 
+        }
+    }
     for (auto &p : fs::directory_iterator(patterns_dir)) {
         LOG_DEBUG << p.path().string(); 
         std::ifstream jsonfile(p.path().string());

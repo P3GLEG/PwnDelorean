@@ -18,4 +18,6 @@ mkdir build
 cd build
 cmake ..
 make
-#Need unicode support blame C++
+mkdir -p /usr/share/PwnDelorean/
+cp -r patterns /usr/share/PwnDelorean/
+cp pwndelorean /usr/local/bin/
