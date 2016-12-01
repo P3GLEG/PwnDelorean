@@ -11,11 +11,24 @@ FilesystemEngine::FilesystemEngine(void) {
     e1 = &this->engine;
 }
 
+std::vector<std::string> binary_files = {".dll", ".so"}; //These file types typically always match and give junk data
+
+bool FilesystemEngine::isBinary(std::string file_ext){
+//    return std::find(binary.begin(), binary.end(), filename) != vector.end();
+return true;
+}
+
 void FilesystemEngine::start(std::string dir_to_scan) {
     for (auto &path: fs::recursive_directory_iterator(dir_to_scan)) {
         LOG_DEBUG << "Scanning in Directory: " << path.path().generic_string();
             if(!fs::is_directory(path.path())) {
                 LOG_DEBUG << "filename found :" << path.path().generic_string();
+                /*
+                if(isBinary(path.path().generic_string().extension){
+                    LOG_DEBUG << "It's binary ignoring...:" << path.path().generic_string();
+                    continue;
+                }
+                 */
                 e1->search_for_filename_match(path.path(), "", "");
                 std::ifstream file(path.path());
                 int line_number = 1;

@@ -12,6 +12,7 @@ class FilesystemEngine {
         Engine engine;
         FilesystemEngine(void);
         void start(std::string dir_to_scan);
+        bool isBinary(std::string file_ext);
 
 };
 #endif
