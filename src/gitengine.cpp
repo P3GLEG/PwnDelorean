@@ -1,6 +1,5 @@
 #include <deque>
 #include "gitengine.h"
-#include "../deps/libgit2/include/git2/diff.h"
 
 namespace fs = std::experimental::filesystem;
 git_repository *repo = NULL;
@@ -218,6 +217,7 @@ int GitEngine::remote_start(const char *url,const char *clone_dir) {
     progress_data pd = {{0}};
 	git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
 	git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git_proxy_options proxy_opts =  GIT_PROXY_OPTIONS_INIT;
 	checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
 	checkout_opts.progress_cb = checkout_progress;
 	checkout_opts.progress_payload = &pd;
@@ -229,6 +229,7 @@ int GitEngine::remote_start(const char *url,const char *clone_dir) {
     if (error != 0) {
         //TODO: Prompt to continue if output_dir has repo already
         LOG_FATAL << "Unable to clone repo due to network error! Or previously been cloned into " << clone_dir;
+	LOG_FATAL << "Error: " << giterr_last()->message;
         return FAILURE;
     }
     begin(clone_dir);
@@ -236,6 +237,7 @@ int GitEngine::remote_start(const char *url,const char *clone_dir) {
     git_libgit2_shutdown();
     return SUCCESS;
 }
+
 
 
  

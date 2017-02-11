@@ -4,10 +4,10 @@
 class GitEngineTests: public ::testing::Test {
     protected: 
         virtual void SetUp(){
-            git.remote_start("https://github.com/pegleg2060/PwnDeloreanTestRepo.git", "/tmp/pwndeloreantests");
+		git.remote_start("https://github.com/pegleg2060/PwnDeloreanTestRepo.git", "/tmp/pwndeloreantests");
         }
         virtual void TearDown(){
-            system("rm -r /tmp/pwndeloreantests");
+		system("rm -rf /tmp/pwndeloreantests");
         }
 
         GitEngine git;

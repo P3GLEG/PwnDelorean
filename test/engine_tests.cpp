@@ -6,6 +6,8 @@ class EngineTests: public ::testing::Test {
             static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
             plog::init(plog::debug, &consoleAppender);
         }
+	virtual void TearDown(){
+	}
     Engine e;
 };
 

@@ -2,7 +2,7 @@
  * @Author Paul Ganea
  */
 extern "C" {
-    #include "../deps/libgit2/include/git2.h"
+    #include <git2.h>
 }
 
 #include <map>

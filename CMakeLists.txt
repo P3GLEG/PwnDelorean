@@ -7,7 +7,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(LIBGIT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps/libgit2)
 set(LIBGIT_INCLUDE_DIR ${LIBGIT_SOURCE_DIR}/include)
 set(PLOG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/deps/plog/include)
-set(RE2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/deps/re2/re2)
+set(RE2_INCLUDE_DIR /usr/include/re2)
 
 file(GLOB_RECURSE PWNDELOREAN_HEADERS ${CMAKE_SOURCE_DIR}/src)
 file(GLOB_RECURSE PWNDELOREAN_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
@@ -26,7 +26,7 @@ else()
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-OPTION (BUILD_SHARED_LIBS "Build Shared Library (OFF for Static)" OFF)
+OPTION (BUILD_SHARED_LIBS "Build Shared Library (OFF for Static)" ON)
 OPTION (BUILD_TESTS "Build Tests" ON)
 
 FILE(COPY ${CMAKE_SOURCE_DIR}/patterns DESTINATION .)
@@ -36,7 +36,6 @@ INCLUDE_DIRECTORIES(${RE2_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${LIBGIT_INCLUDE_DIRS})
 
 INCLUDE_DIRECTORIES(${PWNDELOREAN_HEADERS})
-#ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES}/engine.cpp ${PWNDELOREAN_SOURCES}/gitengine.cpp ${PWNDELOREAN_SOURCES}/main.cpp)
-ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES} src/filesystemengine.cpp)
-#All these libraries are required by libgit2
-TARGET_LINK_LIBRARIES(pwndelorean stdc++fs re2 ${OPENSSL_LIBRARIES} Threads::Threads ${LIBGIT_SOURCE_DIR}/build/libgit2.a ssh2 z http_parser icuio icui18n icuuc icudata)
+ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES} src/engine.cpp src/gitengine.cpp src/main.cpp)
+#ADD_EXECUTABLE(pwndelorean ${PWNDELOREAN_SOURCES} src/filesystemengine.cpp)
+TARGET_LINK_LIBRARIES(pwndelorean stdc++fs re2 ${OPENSSL_LIBRARIES} ${LIBGIT_SOURCE_DIR}/build/libgit2.a Threads::Threads  ssh2 z http_parser icuio icui18n icuuc icudata)
