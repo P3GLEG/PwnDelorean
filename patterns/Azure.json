@@ -23,10 +23,5 @@
     "description": "Azure service configuration file",
     "type": "secretFilename",
     "regex": "\\.cscfg$"
-  },
-  {
-    "description": "Azure service configuration file",
-    "type": "secretFilename",
-    "regex": "\\.cscfg$"
   }
 ]

@@ -5,21 +5,6 @@
     "regex": "\\.pcap$"
   },
   {
-    "description": "Pidgin OTR private key",
-    "type": "secretFilename",
-    "regex": "otr.private_key"
-  },
-  {
-    "description": "Shell command history file",
-    "type": "secretFilename",
-    "regex": "\\A\\.?(bash_|zsh_|z)?history\\z"
-  },
-  {
-    "description": "Ruby IRB console history file",
-    "type": "secretFilename",
-    "regex": "\\A\\.?irb_history\\z"
-  },
-  {
     "description": "Pidgin chat client account configuration file",
     "type": "secretFilename",
     "regex": "accounts[\\s\\S]*.xml"
@@ -36,19 +21,9 @@
 
   },
   {
-    "description": "Irssi IRC client configuration file",
-    "type": "secretFilename",
-    "regex": "\\.?irssi\\/config\\z"
-  },
-  {
     "description": "Recon-ng web reconnaissance framework API key database",
     "type": "secretFilename",
     "regex": ".?recon-ng[\\s\\S]*.db"
-  },
-  {
-    "description": "Mutt e-mail client configuration file",
-    "regex": "\\A\\.?muttrc\\z",
-    "type": "secretFilename"
   },
   {
     "description": "S3cmd configuration file",
@@ -64,21 +39,6 @@
     "description": "OpenVPN client configuration file",
     "type": "secretFilename",
     "regex": "\\.ovpn$"
-  },
-  {
-    "description": "Shell configuration file",
-    "type": "secretFilename",
-    "regex": "\\A\\.?(bash|zsh)rc\\z"
-  },
-  {
-    "description": "Shell profile configuration file",
-    "type": "secretFilename",
-    "regex": "\\A\\.?(bash_|zsh_)?profile\\z"
-  },
-  {
-    "description": "Shell command alias configuration file",
-    "type": "secretFilename",
-    "regex": "\\A\\.?(bash_|zsh_)?aliases\\z"
   },
   {
     "description": "Ruby On Rails secret token configuration file",
@@ -153,11 +113,6 @@
     "regex": "jenkins.plugins.publish_over_ssh.*.xml"
   },
   {
-    "description": "Apache htpasswd file",
-    "type": "secretFilename",
-    "regex": "\\A\\.?htpasswd\\z"
-  },
-  {
     "description": "Potential MediaWiki configuration file",
     "type": "secretFilename",
     "regex": "LocalSettings*.php"
@@ -174,119 +129,13 @@
   },
   {
     "type": "secretFilename",
-    "description": "pgpassword",
-    "regex": "\\A\\.?pgpass\\z"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "\\.?aws/credentials\\z",
-    "description": "AWS CLI credentials file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "\\A\\.?trc\\z",
-    "description": "T command-line Twitter client configuration file"
-  },
-  
-  {
-    "type": "secretFilename",
-    "regex": "private.*key",
-    "description": "Contains words: private, key"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "jenkins.plugins.publish_over_ssh.BapSshPublisherPlugin.xml",
-    "description": "Jenkins publish over SSH plugin file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "kwallet",
-    "description": "KDE Wallet Manager database file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "tblk",
-    "description": "Tunnelblick VPN configuration file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "Favorites.plist",
-    "description": "Sequel Pro MySQL database manager bookmark file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "configuration.user.xpl",
-    "description": "Little Snitch firewall configuration file"
-  },
-  {
-    "type": "secretFilename",
     "regex": "dayone.*",
     "description": "Day One journal file"
   },
   {
     "type": "secretFilename",
-    "regex": "journal.txt",
-    "description": "Potential jrnl journal file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "\\A\\.?tugboat\\z",
-    "description": "Tugboat DigitalOcean management tool configuration"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "\\A\\.?git-credentials\\z",
-    "description": "git-credential-store helper credentials file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "\\A\\.?gitconfig\\z",
-    "description": "Git configuration file"
-  },
-  {
-    "type": "secretFilename",
     "regex": "knife*.rb",
     "description": "Chef Knife configuration file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "\\.?chef/(.*)\\.pem\\z",
-    "description": "Chef private key"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "proftpdpasswd",
-    "description": "cPanel backup ProFTPd credentials file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "robomongo.json",
-    "description": "Robomongo MongoDB manager configuration file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "filezilla.xml",
-    "description": "FileZilla FTP configuration file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "recentservers.xml",
-    "description": "FileZilla FTP recent servers file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "ventrilo_srv.ini",
-    "description": "Ventrilo server configuration file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "\\A\\.?dockercfg\\z",
-    "description": "Docker configuration file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "\\A\\.?npmrc\\z",
-    "description": "NPM configuration file"
   },
   {
     "type": "fileContent",
@@ -332,11 +181,6 @@
     "description": "admin account?",
     "type": "fileContent",
     "regex": "administrator.*"
-  },
-  {
-    "description": "What is?",
-    "type": "fileContent",
-    "regex": "secret.*"
   },
   {
     "description": "It could open a door",

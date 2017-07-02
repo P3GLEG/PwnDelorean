@@ -31,11 +31,6 @@
 
     },
     {
-      "description": "DBeaver SQL database manager configuration file",
-      "type": "secretFilename",
-      "regex": "\\A\\.?dbeaver-data-sources.xml\\z"
-    },
-    {
       "description": "Ruby On Rails database configuration file",
       "type": "secretFilename",
       "regex":"database[\\s\\S]*.yml"

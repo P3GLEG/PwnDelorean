@@ -12,12 +12,12 @@
   {
     "description": "Encryption Key",
     "type": "fileContent",
-    "regex": "HMACSHA1*"
+    "regex": "[^ ]HMACSHA1*"
   },
   {
     "description": "Machine Key",
     "type": "fileContent",
-    "regex": "machinekey*"
+    "regex": "[^ ]machinekey*"
   },
   {
     "description": "Potential MSBuild publish profile",
