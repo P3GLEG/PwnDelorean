@@ -1,27 +1,27 @@
 [
   {
     "description": "Decryption Key",
-    "type":"fileContent",
-    "regex": "CryptDeriveKey*"
+    "secretType":"fileContentLiteral",
+    "value": "CryptDeriveKey"
   },
   {
     "description": "Encryption Key",
-    "type": "fileContent",
-    "regex": "CryptGenKey*"
+    "secretType": "fileContentLiteral",
+    "value": "CryptGenKey*"
   },
   {
     "description": "Encryption Key",
-    "type": "fileContent",
-    "regex": "[^ ]HMACSHA1*"
+    "secretType": "fileContentLiteral",
+    "value": "HMACSHA1"
   },
   {
     "description": "Machine Key",
-    "type": "fileContent",
-    "regex": "[^ ]machinekey*"
+    "secretType": "fileContentLiteral",
+    "value": "machinekey"
   },
   {
     "description": "Potential MSBuild publish profile",
-    "type":"secretFilename",
-    "regex": "\\.pubxml(\\.user)?$"
+    "secretType":"secretFilenameRegex",
+    "value": "\\.pubxml(\\.user)?$"
   }
 ]

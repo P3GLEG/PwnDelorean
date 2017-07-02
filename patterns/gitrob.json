@@ -1,397 +1,357 @@
 [
     {
-    "regex":"\\A.*_rsa\\z",
+    "value":"\\A.*_rsa\\z",
     "description":"Private SSH key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A.*_dsa\\z",
+    "value":"\\A.*_dsa\\z",
     "description":"Private SSH key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A.*_ed25519\\z",
+    "value":"\\A.*_ed25519\\z",
     "description":"Private SSH key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A.*_ecdsa\\z",
+    "value":"\\A.*_ecdsa\\z",
     "description":"Private SSH key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\.?ssh/config\\z",
+    "value":"\\.?ssh/config\\z",
     "description":"SSH configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"pem",
+    "value":".pem",
     "description":"Potential cryptographic private key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\Akey(pair)?\\z",
+    "value":"\\Akey(pair)?\\z",
     "description":"Potential cryptographic private key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"pkcs12",
+    "value":".pkcs12",
     "description":"Potential cryptographic key bundle",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"pfx",
+    "value":".pfx",
     "description":"Potential cryptographic key bundle",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"p12",
+    "value":".p12",
     "description":"Potential cryptographic key bundle",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"asc",
+    "value":".asc",
     "description":"Potential cryptographic key bundle",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"otr.private_key",
+    "value":".otr.private_key",
     "description":"Pidgin OTR private key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\A\\.?(bash_|zsh_|z)?history\\z",
+    "value":"\\A\\.?(bash_|zsh_|z)?history\\z",
     "description":"Shell command history file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?mysql_history\\z",
+    "value":"\\A\\.?mysql_history\\z",
     "description":"MySQL client command history file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?psql_history\\z",
+    "value":"\\A\\.?psql_history\\z",
     "description":"PostgreSQL client command history file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?pgpass\\z",
+    "value":"\\A\\.?pgpass\\z",
     "description":"PostgreSQL password file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?irb_history\\z",
+    "value":"\\A\\.?irb_history\\z",
     "description":"Ruby IRB console history file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\.?purple\\/accounts\\.xml\\z",
+    "value":"\\.?purple\\/accounts\\.xml\\z",
     "description":"Pidgin chat client account configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\.?xchat2?\\/servlist_?\\.conf\\z",
+    "value":"\\.?xchat2?\\/servlist_?\\.conf\\z",
     "description":"Hexchat/XChat IRC client server list configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\.?irssi\\/config\\z",
+    "value":"\\.?irssi\\/config\\z",
     "description":"Irssi IRC client configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\.?recon-ng\\/keys\\.db\\z",
+    "value":"\\.?recon-ng\\/keys\\.db\\z",
     "description":"Recon-ng web reconnaissance framework API key database",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?dbeaver-data-sources.xml\\z",
+    "value":"\\A\\.?dbeaver-data-sources.xml\\z",
     "description":"DBeaver SQL database manager configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?muttrc\\z",
+    "value":"\\A\\.?muttrc\\z",
     "description":"Mutt e-mail client configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?s3cfg\\z",
+    "value":"\\A\\.?s3cfg\\z",
     "description":"S3cmd configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\.?aws/credentials\\z",
+    "value":"\\.?aws/credentials\\z",
     "description":"AWS CLI credentials file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?trc\\z",
+    "value":"\\A\\.?trc\\z",
     "description":"T command-line Twitter client configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"ovpn",
+    "value":".ovpn",
     "description":"OpenVPN client configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\A\\.?gitrobrc\\z",
+    "value":"\\A\\.?gitrobrc\\z",
     "description":"Well, this is awkward... Gitrob configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?(bash|zsh)rc\\z",
+    "value":"\\A\\.?(bash|zsh)rc\\z",
     "description":"Shell configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?(bash_|zsh_)?profile\\z",
+    "value":"\\A\\.?(bash_|zsh_)?profile\\z",
     "description":"Shell profile configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?(bash_|zsh_)?aliases\\z",
+    "value":"\\A\\.?(bash_|zsh_)?aliases\\z",
     "description":"Shell command alias configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"secret_token.rb",
-    "description":"Ruby On Rails secret token configuration file",
-    "type":"secretFilename"
-    },
-    {
-    "regex":"omniauth.rb",
-    "description":"OmniAuth configuration file",
-    "type":"secretFilename"
-    },
-    {
-    "regex":"carrierwave.rb",
-    "description":"Carrierwave configuration file",
-    "type":"secretFilename"
-    },
-    {
-    "regex":"schema.rb",
-    "description":"Ruby On Rails database schema file",
-    "type":"secretFilename"
-    },
-    {
-    "regex":"database.yml",
+    "value":"database.yml",
     "description":"Potential Ruby On Rails database configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"settings.py",
-    "description":"Django configuration file",
-    "type":"secretFilename"
-    },
-    {
-    "regex":"\\A(.*)?config(\\.inc)?\\.php\\z",
+    "value":"\\A(.*)?config(\\.inc)?\\.php\\z",
     "description":"PHP configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"kdb",
+    "value":"kdb",
     "description":"KeePass password manager database file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"agilekeychain",
+    "value":"agilekeychain",
     "description":"1Password password manager database file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"keychain",
+    "value":"keychain",
     "description":"Apple Keychain database file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\Akey(store|ring)\\z",
+    "value":"\\Akey(store|ring)\\z",
     "description":"GNOME Keyring database file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"log",
+    "value":".log",
     "description":"Log file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"pcap",
+    "value":".pcap",
     "description":"Network traffic capture file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\Asql(dump)?\\z",
+    "value":"\\Asql(dump)?\\z",
     "description":"SQL dump file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"gnucash",
+    "value":".gnucash",
     "description":"GnuCash database file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"backup",
-    "description":"Contains word: backup",
-    "type":"secretFilename"
-    },
-    {
-    "regex":"dump",
-    "description":"Contains word: dump",
-    "type":"secretFilename"
-    },
-    {
-    "regex":"password",
-    "description":"Contains word: password",
-    "type":"secretFilename"
-    },
-    {
-    "regex":"credential",
+    "value":"credential",
     "description":"Contains word: credential",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"secret",
+    "value":"secret",
     "description":"Contains word: secret",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"private.*key",
+    "value":"private[^ ]*key",
     "description":"Contains words: private, key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"jenkins.plugins.publish_over_ssh.BapSshPublisherPlugin.xml",
+    "value":"jenkins.plugins.publish_over_ssh.BapSshPublisherPlugin.xml",
     "description":"Jenkins publish over SSH plugin file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"credentials.xml",
+    "value":"credentials.xml",
     "description":"Potential Jenkins credentials file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\A\\.?htpasswd\\z",
+    "value":"\\A\\.?htpasswd\\z",
     "description":"Apache htpasswd file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A(\\.|_)?netrc\\z",
+    "value":"\\A(\\.|_)?netrc\\z",
     "description":"Configuration file for auto-login process",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"kwallet",
+    "value":"kwallet",
     "description":"KDE Wallet Manager database file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"LocalSettings.php",
+    "value":"LocalSettings.php",
     "description":"Potential MediaWiki configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"tblk",
+    "value":"tblk",
     "description":"Tunnelblick VPN configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\.?gem/credentials\\z",
+    "value":"\\.?gem/credentials\\z",
     "description":"Rubygems credentials file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A*\\.pubxml(\\.user)?\\z",
+    "value":"\\A*\\.pubxml(\\.user)?\\z",
     "description":"Potential MSBuild publish profile",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"Favorites.plist",
+    "value":"Favorites.plist",
     "description":"Sequel Pro MySQL database manager bookmark file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"configuration.user.xpl",
+    "value":"configuration.user.xpl",
     "description":"Little Snitch firewall configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"dayone",
+    "value":"dayone",
     "description":"Day One journal file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"journal.txt",
+    "value":"journal.txt",
     "description":"Potential jrnl journal file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\A\\.?tugboat\\z",
+    "value":"\\A\\.?tugboat\\z",
     "description":"Tugboat DigitalOcean management tool configuration",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?git-credentials\\z",
+    "value":"\\A\\.?git-credentials\\z",
     "description":"git-credential-store helper credentials file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?gitconfig\\z",
+    "value":"\\A\\.?gitconfig\\z",
     "description":"Git configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"knife.rb",
+    "value":"knife.rb",
     "description":"Chef Knife configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\.?chef/(.*)\\.pem\\z",
+    "value":"\\.?chef/(.*)\\.pem\\z",
     "description":"Chef private key",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"proftpdpasswd",
+    "value":"proftpdpasswd",
     "description":"cPanel backup ProFTPd credentials file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"robomongo.json",
+    "value":"robomongo.json",
     "description":"Robomongo MongoDB manager configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"filezilla.xml",
+    "value":"filezilla.xml",
     "description":"FileZilla FTP configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"recentservers.xml",
+    "value":"recentservers.xml",
     "description":"FileZilla FTP recent servers file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"ventrilo_srv.ini",
+    "value":"ventrilo_srv.ini",
     "description":"Ventrilo server configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\A\\.?dockercfg\\z",
+    "value":"\\A\\.?dockercfg\\z",
     "description":"Docker configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"\\A\\.?npmrc\\z",
+    "value":"\\A\\.?npmrc\\z",
     "description":"NPM configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     },
     {
-    "regex":"terraform.tfvars",
+    "value":"terraform.tfvars",
     "description":"Terraform variable config file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameLiteral"
     },
     {
-    "regex":"\\A\\.?env\\z",
+    "value":"\\A\\.?env\\z",
     "description":"Environment configuration file",
-    "type":"secretFilename"
+    "secretType":"secretFilenameRegex"
     }
 ]

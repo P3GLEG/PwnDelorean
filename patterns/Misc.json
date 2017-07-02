@@ -1,200 +1,138 @@
 [
   {
     "description": "Network traffic capture file",
-    "type": "secretFilename",
-    "regex": "\\.pcap$"
+    "secretType": "secretFilenameLiteral",
+    "value": ".pcap"
   },
   {
     "description": "Pidgin chat client account configuration file",
-    "type": "secretFilename",
-    "regex": "accounts[\\s\\S]*.xml"
+    "secretType": "secretFilenameRegex",
+    "value": "accounts[\\s\\S]*.xml"
   },
   {
     "description": "Wordpress configuration file",
-    "type": "secretFilename",
-    "regex": "wp-config[\\s\\S]*.php"
+    "secretType": "secretFilenameRegex",
+    "value": "wp-config[\\s\\S]*.php"
   },
   {
     "description": "Hexchat/XChat IRC client server list configuration file",
-    "type": "secretFilename",
-    "regex": ".?xchat2[\\s\\S]*.conf"
+    "secretType": "secretFilenameRegex",
+    "value": ".?xchat2[\\s\\S]*.conf"
 
   },
   {
     "description": "Recon-ng web reconnaissance framework API key database",
-    "type": "secretFilename",
-    "regex": ".?recon-ng[\\s\\S]*.db"
+    "secretType": "secretFilenameRegex",
+    "value": ".?recon-ng[\\s\\S]*.db"
   },
   {
     "description": "S3cmd configuration file",
-    "type": "secretFilename",
-    "regex": "\\.s3cfg$"
+    "secretType": "secretFilenameLiteral",
+    "value": ".s3cfg"
   },
   {
     "description": "T command-line Twitter client configuration file",
-    "type": "secretFilename",
-    "regex": "\\.trc$"
+    "secretType": "secretFilenameLiteral",
+    "value": ".trc"
   },
   {
     "description": "OpenVPN client configuration file",
-    "type": "secretFilename",
-    "regex": "\\.ovpn$"
+    "secretType": "secretFilenameLiteral",
+    "value": ".ovpn"
   },
   {
     "description": "Ruby On Rails secret token configuration file",
-    "type": "secretFilename",
-    "regex": "secret_token*.rb"
+    "secretType": "secretFilenameLiteral",
+    "value": "secret_token"
   },
   {
     "description": "OmniAuth configuration file",
-    "regex": "omniauth*.rb",
-    "type": "secretFilename"
+    "value": "omniauth",
+    "secretType": "secretFilenameLiteral"
   },
   {
     "description": "Carrierwave configuration file",
-    "type": "secretFilename",
-    "regex": "carrierwave*.rb"
+    "secretType": "secretFilenameLiteral",
+    "value": "carrierwave"
   },
-  {
-    "description": "Ruby On Rails database schema file",
-    "type": "secretFilename",
-    "regex": "schema*.rb"
-  },
-
   {
     "description": "Django configuration file",
-    "type": "secretFilename",
-    "regex": "settings*.py"
+    "secretType": "secretFilenameLiteral",
+    "value": "settings.py"
   },
   {
     "description": "PHP configuration file",
-    "type": "secretFilename",
-    "regex": ".?config[\\s\\S]*.php"
+    "secretType": "secretFilenameRegex",
+    "value": ".?config[\\s\\S]*.php"
   },
   {
     "description": "Client SSH Config",
-    "type": "secretFilename",
-    "regex": ".?ssh_config[\\s\\S]*"
+    "secretType": "secretFilenameRegex",
+    "value": ".?ssh_config[\\s\\S]*"
   },
   {
     "description": "Server SSH Config",
-    "type": "secretFilename",
-    "regex": ".?sshd_config[\\s\\S]*"
+    "secretType": "secretFilenameRegex",
+    "value": ".?sshd_config[\\s\\S]*"
   },
   {
     "description": "KeePass password manager database file",
-    "type": "secretFilename",
-    "regex": "\\.kdb$"
+    "secretType": "secretFilenameLiteral",
+    "value": "kdb"
   },
   {
-    "description": "1Password password manager database file",
-    "regex": "agilekeychain*",
-    "type": "secretFilename"
-  },
-  {
-    "description": "Apple Keychain database file",
-    "type": "secretFilename",
-    "regex": "keychain*"
-  },
-  {
-
     "description": "Contains word: backup",
-    "type": "secretFilename",
-    "regex": "\\.backup$"
+    "secretType": "secretFilenameLiteral",
+    "value": ".backup"
   },
   {
     "description": "Contains word: dump",
-    "type": "secretFilename",
-    "regex": "\\.dump$"
+    "secretType": "secretFilenameLiteral",
+    "value": ".dump"
   },
   {
     "description": "Jenkins publish over SSH plugin file",
-    "type": "secretFilename",
-    "regex": "jenkins.plugins.publish_over_ssh.*.xml"
+    "secretType": "secretFilenameRegex",
+    "value": "jenkins.plugins.publish_over_ssh[^ ]*.xml"
   },
   {
     "description": "Potential MediaWiki configuration file",
-    "type": "secretFilename",
-    "regex": "LocalSettings*.php"
+    "secretType": "secretFilenameRegex",
+    "value": "LocalSettings[^ ]*php"
   },
   {
     "description": "Rubygems credentials file",
-    "type": "secretFilename",
-    "regex": "\\A\\.?gem/credentials\\z"
+    "secretType": "secretFilenameRegex",
+    "value": "\\A\\.?gem/credentials\\z"
   },
   {
     "description": "SSH file",
-    "type": "secretFilename",
-    "regex": ".ssh*"
+    "secretType": "secretFilenameLiteral",
+    "value": ".ssh"
   },
   {
-    "type": "secretFilename",
-    "regex": "dayone.*",
-    "description": "Day One journal file"
-  },
-  {
-    "type": "secretFilename",
-    "regex": "knife*.rb",
+    "secretType": "secretFilenameRegex",
+    "value": "knife[^ ]*rb",
     "description": "Chef Knife configuration file"
   },
-  {
-    "type": "fileContent",
+ {
+    "secretType": "fileContentRegex",
     "description": "Maybe a username",
-    "regex": "user.*"
-  },
-  {
-    "type": "fileContent",
-    "description": "Maybe a username",
-    "regex": "username.*"
-  },
-  {
-    "description": "sql query",
-    "type": "fileContent",
-    "regex": "select.*"
-  },
-  {
-    "description": "sql query",
-    "type": "fileContent",
-    "regex": "update.*"
-  },
-  {
-    "description": "sql query",
-    "type": "fileContent",
-    "regex": "delete.*"
-  },
-  {
-    "description": "social security #",
-    "type": "fileContent",
-    "regex": "ssn.*"
-  },
-  {
-    "description": "possible PII",
-    "type": "fileContent",
-    "regex": "dob.*"
-  },
-  {
-    "description": "possible PII",
-    "type": "fileContent",
-    "regex": "ccn.*"
+    "value": "user[^ ]*"
   },
   {
     "description": "admin account?",
-    "type": "fileContent",
-    "regex": "administrator.*"
-  },
-  {
-    "description": "It could open a door",
-    "type": "fileContent",
-    "regex": "key.*"
+    "secretType": "fileContentRegex",
+    "value": "administrator[^ ]*"
   },
   {
     "description": "Github Dev API key",
-    "type": "fileContent",
-    "regex": "jekyll_github_token*"
+    "secretType": "fileContentRegex",
+    "value": "jekyll_github_token[^ ]*"
   },
   {
     "description": "DHCP server configs",
-    "type": "secretFilename",
-    "regex": "dhcpd*.conf"
+    "secretType": "secretFilenameRegex",
+    "value": "dhcpd[^ ]*.conf"
   }
 ]
