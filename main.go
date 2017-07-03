@@ -8,8 +8,6 @@ import (
 	"encoding/json"
 	"flag"
 	"regexp"
-	"time"
-	"log"
 	"strings"
 )
 
@@ -19,17 +17,11 @@ type Pattern struct {
 	Value       string       `json:value`
 }
 
-var files = []string{}
 var secretFileNameLiterals = []Pattern{}
 var secretFileNameRegexes = []Pattern{}
 var fileContentLiterals = []Pattern{}
 var fileContentRegexes = []Pattern{}
 var regexes = []*regexp.Regexp{}
-
-func timeTrack(start time.Time, name string) {
-	elapsed := time.Since(start)
-	log.Printf("%s took %dms", name, elapsed.Nanoseconds()/1000)
-}
 
 func initializePatterns(path string, info os.FileInfo, err error) error {
 	if !info.IsDir() {
@@ -58,37 +50,37 @@ func initializePatterns(path string, info os.FileInfo, err error) error {
 	return nil
 }
 
-func appendToFileArray(path string, info os.FileInfo, err error) error {
-	files = append(files, path)
-	return nil
+func GetAllFilesInDirectory(dir string) ([]os.FileInfo, error) {
+	files, err := ioutil.ReadDir(dir)
+	return files, err
 }
 
-func secretFilenameLiteralSearch() {
+func secretFilenameLiteralSearch(files []os.FileInfo) {
 	for _, pattern := range secretFileNameLiterals {
 		for _, filename := range files {
-			if strings.Contains(filename, pattern.Value) {
-				fmt.Println(fmt.Sprintf("Found match %s in %s", pattern.Description, filename))
+			if strings.Contains(filename.Name(), pattern.Value) {
+				fmt.Println(fmt.Sprintf("Found match %s in %s", pattern.Description, filename.Name()))
 			}
 		}
 	}
 }
 
-func secretFilenameRegexSearch() {
+func secretFilenameRegexSearch(files []os.FileInfo) {
 	for _, filename := range files {
 		for _, reg := range regexes {
-			if reg.MatchString(filename) {
-				fmt.Println(fmt.Sprintf("Found match %s", filename))
+			if reg.MatchString(filename.Name()) {
+				fmt.Println(fmt.Sprintf("Found match %s", filename.Name()))
 				break
 			}
 		}
 	}
 }
-func initalize(dirToScan string) {
+
+var dirToScanFlag = flag.String("directory", "", "Directory to scan")
+var repoToScanFlag = flag.String("url", "", "Git Repo URL to scan")
+
+func initalize() {
 	err := filepath.Walk("./patterns", initializePatterns)
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = filepath.Walk(dirToScan, appendToFileArray)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -99,16 +91,30 @@ func initalize(dirToScan string) {
 }
 
 func main() {
-	var dirToScan string
-	flag.StringVar(&dirToScan, "directory", "", "Directory to scan")
+	initalize()
 	flag.Parse()
-	if len(dirToScan) <= 0 {
-		fmt.Println("Please provide a directory to scan")
+	if len(*dirToScanFlag) != 0 {
+		files, err := GetAllFilesInDirectory(*dirToScanFlag)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(-1)
+		}
+		secretFilenameLiteralSearch(files)
+		secretFilenameRegexSearch(files)
+	} else if len(*repoToScanFlag) != 0 {
+		yay, err := GetRepoFilenames(*repoToScanFlag)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(yay)
+	} else {
+		flag.Usage()
 		os.Exit(-1)
 	}
-	initalize(dirToScan)
-	secretFilenameLiteralSearch()
-	secretFilenameRegexSearch()
+
+	//secretFilenameLiteralSearch()
+	//secretFilenameRegexSearch()
+	/*
+
+	*/
 }
-
-
