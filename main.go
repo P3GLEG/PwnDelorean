@@ -15,13 +15,20 @@ type Pattern struct {
 	Description string `json:description`
 	SecretType  string  `json:type`
 	Value       string       `json:value`
+	Regex       *regexp.Regexp
+}
+
+type Match struct {
+	Filename    string
+	Filepath    string
+	CommitID    string
+	Description string
 }
 
 var secretFileNameLiterals = []Pattern{}
 var secretFileNameRegexes = []Pattern{}
 var fileContentLiterals = []Pattern{}
 var fileContentRegexes = []Pattern{}
-var regexes = []*regexp.Regexp{}
 
 func initializePatterns(path string, info os.FileInfo, err error) error {
 	if !info.IsDir() {
@@ -37,10 +44,12 @@ func initializePatterns(path string, info os.FileInfo, err error) error {
 			case "secretFilenameLiteral":
 				secretFileNameLiterals = append(secretFileNameLiterals, pattern)
 			case "secretFilenameRegex":
+				pattern.Regex = regexp.MustCompile(pattern.Value)
 				secretFileNameRegexes = append(secretFileNameRegexes, pattern)
 			case "fileContentLiteral":
 				fileContentLiterals = append(fileContentLiterals, pattern)
 			case "fileContentRegex":
+				pattern.Regex = regexp.MustCompile(pattern.Value)
 				fileContentRegexes = append(fileContentRegexes, pattern)
 			default:
 				fmt.Println("Unable to read " + pattern.Description)
@@ -55,7 +64,55 @@ func GetAllFilesInDirectory(dir string) ([]os.FileInfo, error) {
 	return files, err
 }
 
-func secretFilenameLiteralSearch(files []os.FileInfo) {
+func gitSecretFilenameLiteralSearch(files []GitFile) []Match {
+	var results []Match
+	var table = make(map[string]bool)
+	for _, pattern := range secretFileNameLiterals {
+		for _, filename := range files {
+			if strings.Contains(filename.Name, pattern.Value) {
+				if table[filename.Name] {
+					continue
+				} else {
+					table[filename.Name] = true
+					path := filename.Filepath
+					if len(path) == 0 {
+						path = "/" + filename.Name
+					} else {
+						path += filename.Name
+					}
+					results = append(results, Match{filename.Name, path,
+													filename.CommitId, pattern.Description})
+					fmt.Println(fmt.Sprintf("Found match %s %s", pattern.Description, path))
+				}
+			}
+		}
+	}
+	return results
+}
+
+func gitSecretFilenameRegexSearch(files []GitFile) []Match {
+	var results []Match
+	var table = make(map[string]bool)
+	for _, filename := range files {
+		for _, pattern := range secretFileNameRegexes {
+			if pattern.Regex.MatchString(filename.Name) && !table[filename.Name] {
+				path := filename.Filepath
+				if len(path) == 0 {
+					path = "/" + filename.Name
+				} else {
+					path += filename.Name
+				}
+				results = append(results, Match{filename.Name, path,
+												filename.CommitId, pattern.Description})
+				fmt.Println(fmt.Sprintf("Found match %s %s", pattern.Description, path))
+				break
+			}
+		}
+	}
+	return results
+}
+
+func filesystemSecretFilenameLiteralSearch(files []os.FileInfo) {
 	for _, pattern := range secretFileNameLiterals {
 		for _, filename := range files {
 			if strings.Contains(filename.Name(), pattern.Value) {
@@ -65,10 +122,10 @@ func secretFilenameLiteralSearch(files []os.FileInfo) {
 	}
 }
 
-func secretFilenameRegexSearch(files []os.FileInfo) {
+func filesystemSecretFilenameRegexSearch(files []os.FileInfo) {
 	for _, filename := range files {
-		for _, reg := range regexes {
-			if reg.MatchString(filename.Name()) {
+		for _, pattern := range secretFileNameRegexes {
+			if pattern.Regex.MatchString(filename.Name()) {
 				fmt.Println(fmt.Sprintf("Found match %s", filename.Name()))
 				break
 			}
@@ -84,10 +141,6 @@ func initalize() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	for _, pattern := range secretFileNameRegexes {
-		temp := regexp.MustCompile(pattern.Value)
-		regexes = append(regexes, temp)
-	}
 }
 
 func main() {
@@ -99,22 +152,18 @@ func main() {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
-		secretFilenameLiteralSearch(files)
-		secretFilenameRegexSearch(files)
+		filesystemSecretFilenameLiteralSearch(files)
+		filesystemSecretFilenameRegexSearch(files)
 	} else if len(*repoToScanFlag) != 0 {
-		yay, err := GetRepoFilenames(*repoToScanFlag)
+		files, err := GetRepoFilenames(*repoToScanFlag)
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(yay)
+		gitSecretFilenameLiteralSearch(files)
+		gitSecretFilenameRegexSearch(files)
+		//TODO: Output format for results
 	} else {
 		flag.Usage()
 		os.Exit(-1)
 	}
-
-	//secretFilenameLiteralSearch()
-	//secretFilenameRegexSearch()
-	/*
-
-	*/
 }

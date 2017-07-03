@@ -4,7 +4,6 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
 	"os"
-	"fmt"
 )
 
 type GitFile struct {
@@ -45,7 +44,6 @@ func GetRepoFilenames(repoUrl string) ([]GitFile, error){
 		tree, err := commit.Tree()
 		err = tree.Walk(func(td string, te *git.TreeEntry) int {
 			if te.Type == git.ObjectBlob && te.Filemode == git.FilemodeBlob{
-				fmt.Println(te.Name)
 				commit.Id().String()
 				filenames = append(filenames, GitFile{te.Name,
 					td, commit.Id().String()})
