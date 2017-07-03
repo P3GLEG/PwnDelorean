@@ -26,9 +26,17 @@ type Match struct {
 	Description string
 }
 
+type FileStruct struct {
+	Filename string
+	Path string
+}
+
+
 var dirToScanFlag = flag.String("directory", "", "Directory to scan")
 var repoToScanFlag = flag.String("url", "", "Git Repo URL to scan")
 var outputCSVFlag = flag.Bool("csv", false, "Output in CSV Format")
+var fileNamesOnlyFlag = flag.Bool("fileNamesOnly", false, "Disable searching through File for speed increase")
+
 var secretFileNameLiterals = []Pattern{}
 var secretFileNameRegexes = []Pattern{}
 var fileContentLiterals = []Pattern{}
@@ -63,10 +71,6 @@ func initializePatterns(path string, info os.FileInfo, _ error) error {
 	return nil
 }
 
-type FileStruct struct {
-	Filename string
-	Path string
-}
 
 func GetAllFilesInDirectory(dir string) ([]FileStruct, error) {
 	fileList := []FileStruct{}
@@ -221,12 +225,13 @@ func main() {
 			outputCSVFilesystem(results)
 		}
 	} else if len(*repoToScanFlag) != 0 {
-		files, err := GetRepoFilenames(*repoToScanFlag)
+		files, matches, err := GetRepoFilenames(*repoToScanFlag)
 		if err != nil {
 			fmt.Println(err)
 		}
 		results := gitSecretFilenameLiteralSearch(files)
 		results = append(results, gitSecretFilenameRegexSearch(files)...)
+		results = append(results, matches...)
 		if *outputCSVFlag {
 			outputCSVGitRepo(results)
 		}
