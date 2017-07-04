@@ -4,7 +4,6 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
 	"os"
-	"bytes"
 )
 
 type GitFile struct {
@@ -13,18 +12,37 @@ type GitFile struct {
 	CommitId string
 }
 
-func searchContents(contents []byte) (bool, Pattern){
+func searchBlobContents(contents []byte) (bool, Pattern){
+	/*
+	This is matching on things it shouldn't
 	for _, pattern := range fileContentLiterals{
 		if bytes.Contains([]byte(pattern.Value), contents){
+			fmt.Println(pattern.Value)
+			fmt.Println(string(contents))
 			return true, pattern
 		}
 	}
+	*/
 	for _, pattern := range secretFileNameRegexes {
 		if pattern.Regex.Match(contents){
 			return true, pattern
 		}
 	}
 	return false, Pattern{}
+}
+
+func searchAllBranches(repo *git.Repository, walk *git.RevWalk) error{
+	itr, err := repo.NewBranchIterator(git.BranchRemote)
+	defer itr.Free()
+	if err != nil{
+		return err
+	}
+	var f = func(b *git.Branch, t git.BranchType) error {
+		walk.Push(b.Target())
+		return nil
+	}
+	itr.ForEach(f)
+	return nil
 }
 
 func GetRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
@@ -40,17 +58,20 @@ func GetRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
 	if err != nil {
 		return filenames, matches, err
 	}
-	//TODO: Different Branches
+	defer repo.Free()
 	head, err := repo.Head()
 	if err != nil{
 		return filenames, matches, err
 	}
+	defer head.Free()
 	walk, err := repo.Walk()
 	if err != nil{
 		return filenames, matches, err
 	}
+	defer walk.Free()
 	walk.Sorting(git.SortTopological)
 	walk.Push(head.Target())
+	searchAllBranches(repo, walk)
 	gi := head.Target()
 	for {
 		err := walk.Next(gi)
@@ -66,14 +87,13 @@ func GetRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
 				if !*fileNamesOnlyFlag {
 					blob, err := repo.LookupBlob(te.Id)
 					if err == nil {
-						match, pattern := searchContents(blob.Contents())
+						match, pattern := searchBlobContents(blob.Contents())
 						if match {
 							appendGitMatch(pattern, gitFile, table)
 						}
 					}
 				}
 				filenames = append(filenames, gitFile)
-
 			}
 			return 0
 		})
