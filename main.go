@@ -236,7 +236,7 @@ func main() {
 		}
 		results := filesystemSecretFilenameLiteralSearch(files)
 		results = append(results, filesystemSecretFilenameRegexSearch(files)...)
-		if *outputCSVFlag {
+		if len(*outputCSVFlag) != 0 {
 			outputCSVFilesystem(results)
 		}
 	} else if len(*repoToScanFlag) != 0 {
@@ -264,7 +264,7 @@ func main() {
 				results = append(results, matches...)
 			}
 		}
-		if *outputCSVFlag {
+		if len(*outputCSVFlag) != 0 {
 			outputCSVGitRepo(results)
 		}
 	} else {
