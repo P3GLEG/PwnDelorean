@@ -22,17 +22,17 @@
     {
       "description": "MySQL client command history file",
       "secretType": "secretFilenameRegex",
-      "value": "[\\s\\S]*mysql_history"
+      "value": "^[\\s\\S]*mysql_history"
     },
     {
       "description": "PostgreSQL client command history file",
       "secretType": "secretFilenameRegex",
-      "value": "[\\s\\S]*psql_history"
+      "value": "^[\\s\\S]*psql_history"
 
     },
     {
       "description": "Ruby On Rails database configuration file",
       "secretType": "secretFilenameRegex",
-      "value":"database[\\s\\S]*.yml"
+      "value":"^database[\\s\\S]*.yml"
     }
 ]

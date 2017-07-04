@@ -24,6 +24,7 @@ type Match struct {
 	Filepath    string
 	CommitIds   []string
 	Description string
+	Value string
 }
 
 type FileStruct struct {
@@ -34,8 +35,12 @@ type FileStruct struct {
 
 var dirToScanFlag = flag.String("directory", "", "Directory to scan")
 var repoToScanFlag = flag.String("url", "", "Git Repo URL to scan")
-var outputCSVFlag = flag.Bool("csv", false, "Output in CSV Format")
-var fileNamesOnlyFlag = flag.Bool("fileNamesOnly", false, "Disable searching through File for speed increase")
+var outputCSVFlag = flag.String("csv", "", "Output in CSV Format")
+var fileNamesOnlyFlag = flag.Bool("fileNamesOnly", false,
+	"Disable searching through File for speed increase")
+var organizationFlag= flag.String("organization", "", "Search all of an Organizations repos")
+var ignoreForkRepos = flag.Bool("ignoreForkedRepos", true,
+	"Ignore any Organization repos that are forked")
 
 var secretFileNameLiterals = []Pattern{}
 var secretFileNameRegexes = []Pattern{}
@@ -89,8 +94,8 @@ func appendFilesystemMatch(pattern Pattern, filestruct FileStruct, table map[str
 	_, exists := table[name]
 	if !exists {
 		table[name] = &Match{filestruct.Filename, filestruct.Path,
-			nil,pattern.Description}
-		fmt.Println(fmt.Sprintf("Found match %s: %s", pattern.Description, filestruct.Path))
+			nil,pattern.Description, pattern.Value}
+		fmt.Println(fmt.Sprintf("Found match %s: %s %s", pattern.Description, filestruct.Path, pattern.Value))
 	}
 }
 func appendGitMatch(pattern Pattern, filename GitFile, table map[string]*Match) {
@@ -107,8 +112,10 @@ func appendGitMatch(pattern Pattern, filename GitFile, table map[string]*Match) 
 		table[path].CommitIds = append(table[path].CommitIds, filename.CommitId)
 	} else {
 		table[path] = &Match{filename.Name, path,
-							 []string{filename.CommitId}, pattern.Description}
-		fmt.Println(fmt.Sprintf("Found match %s %s", pattern.Description, path))
+							 []string{filename.CommitId}, pattern.Description,
+			pattern.Value}
+		fmt.Println(fmt.Sprintf("Found match %s %s %s %s", pattern.Description,
+			path, filename.RepoUrl, pattern.Value))
 	}
 }
 
@@ -185,12 +192,19 @@ func initalize() {
 	}
 }
 
-func outputCSV(records [][]string) {
-	w := csv.NewWriter(os.Stdout)
-	w.WriteAll(records)
-	if err := w.Error(); err != nil {
-		fmt.Println(err)
+func outputCSV(filename string, records [][]string) {
+	file, err := os.Create(filename)
+	if err != nil{
+		fmt.Println("Unable to open file, possibly due to permissions dump to STDOUT")
+		w := csv.NewWriter(os.Stdout)
+		w.WriteAll(records)
+		if err := w.Error(); err != nil {
+			fmt.Println(err)
+		}
 	}
+	w := csv.NewWriter(file)
+	w.WriteAll(records)
+	defer file.Close()
 }
 
 func outputCSVFilesystem(matches []*Match){
@@ -198,17 +212,18 @@ func outputCSVFilesystem(matches []*Match){
 	for _, match := range matches {
 		records = append(records, []string{match.Filename, match.Description, match.Filepath})
 	}
-	outputCSV(records)
+	outputCSV(*outputCSVFlag, records)
 }
 
 func outputCSVGitRepo(matches []*Match){
-	records := [][]string{{"Filename", "Description", "Filepath", "CommitID"}}
+	records := [][]string{{"Filename", "Description", "Filepath", "CommitID", "Value"}}
 	for _, match := range matches {
 		records = append(records, []string{match.Filename, match.Description, match.Filepath,
-										   strings.Join(match.CommitIds, "|")})
+										   strings.Join(match.CommitIds, "|"), match.Value})
 	}
-	outputCSV(records)
+	outputCSV(*outputCSVFlag, records)
 }
+
 
 func main() {
 	initalize()
@@ -225,13 +240,30 @@ func main() {
 			outputCSVFilesystem(results)
 		}
 	} else if len(*repoToScanFlag) != 0 {
-		files, matches, err := GetRepoFilenames(*repoToScanFlag)
-		if err != nil {
+		results, err := gitRepoSearch(*repoToScanFlag)
+		if err != nil{
 			fmt.Println(err)
 		}
-		results := gitSecretFilenameLiteralSearch(files)
-		results = append(results, gitSecretFilenameRegexSearch(files)...)
-		results = append(results, matches...)
+		if len(*outputCSVFlag) != 0 {
+			outputCSVGitRepo(results)
+		}
+	} else if len(*organizationFlag) != 0{
+		var results = []*Match{}
+		urls, err := getAllOrganizationsRepoUrls(*organizationFlag)
+		if err!= nil {
+			fmt.Println(err)
+			os.Exit(-1)
+		}
+		matchChan := make(chan []*Match, len(urls))
+		for _, url := range urls{
+			go getOrgRepo(url, matchChan)
+		}
+		for i:= 0; i < len(urls); i++{
+			select {
+			case matches := <-matchChan:
+				results = append(results, matches...)
+			}
+		}
 		if *outputCSVFlag {
 			outputCSVGitRepo(results)
 		}
@@ -240,3 +272,4 @@ func main() {
 		os.Exit(-1)
 	}
 }
+

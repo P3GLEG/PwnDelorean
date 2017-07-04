@@ -7,7 +7,7 @@
   {
     "description": "Encryption Key",
     "secretType": "fileContentLiteral",
-    "value": "CryptGenKey*"
+    "value": "CryptGenKey"
   },
   {
     "description": "Encryption Key",
