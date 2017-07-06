@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 	"encoding/csv"
+    "bytes"
 )
 
 type Pattern struct {
@@ -39,7 +40,7 @@ var outputCSVFlag = flag.String("csv", "", "Output in CSV Format")
 var fileNamesOnlyFlag = flag.Bool("fileNamesOnly", false,
 	"Disable searching through File for speed increase")
 var organizationFlag= flag.String("organization", "", "Search all of an Organizations repos")
-var ignoreForkRepos = flag.Bool("ignoreForkedRepos", true,
+var ignoreForkRepos = flag.Bool("ignoreForkedRepos", false,
 	"Ignore any Organization repos that are forked")
 
 var secretFileNameLiterals = []Pattern{}
@@ -47,6 +48,36 @@ var secretFileNameRegexes = []Pattern{}
 var fileContentLiterals = []Pattern{}
 var fileContentRegexes = []Pattern{}
 
+var ignoreExts = []string{".dll", ".nupkg"}
+func searchThroughFile(path string) (bool, Pattern, error){
+    fi, err := os.Stat(path)
+    if err != nil {
+        return false, Pattern{}, err
+    }
+    ext := filepath.Ext(path)
+    for _, ignore := range ignoreExts{
+        if ext == ignore{
+            return false, Pattern{}, err
+        }
+    }
+    if fi.IsDir() || strings.Contains(path, ".git"){
+        return false, Pattern{}, err
+    }
+    f, err := ioutil.ReadFile(path)
+    if err != nil{
+        return false, Pattern{}, err
+    }
+
+    lines := bytes.Split(f, []byte("\n"))
+    for _, pattern := range fileContentRegexes{
+        for _, line := range lines{
+            if pattern.Regex.Match(line){
+                return true, pattern, nil
+            }
+        }
+        }
+    return false, Pattern{}, nil
+}
 func initializePatterns(path string, info os.FileInfo, _ error) error {
 	if !info.IsDir() {
 		file, e := ioutil.ReadFile(path)
@@ -224,6 +255,20 @@ func outputCSVGitRepo(matches []*Match){
 	outputCSV(*outputCSVFlag, records)
 }
 
+func searchFileContents(files []FileStruct) []*Match{
+        var table = make(map[string]*Match)
+        for _, f := range files{
+            match, p, err :=searchThroughFile(f.Path)
+            if err == nil && match{
+                appendFilesystemMatch(p,f,table)
+            }
+        }
+        var results []*Match
+        for _, values := range table {
+            results = append(results, values)
+        }
+        return results
+}
 
 func main() {
 	initalize()
@@ -236,7 +281,10 @@ func main() {
 		}
 		results := filesystemSecretFilenameLiteralSearch(files)
 		results = append(results, filesystemSecretFilenameRegexSearch(files)...)
-		if len(*outputCSVFlag) != 0 {
+        if *fileNamesOnlyFlag{
+            results = append(results, searchFileContents(files)...)
+        }
+        if len(*outputCSVFlag) != 0 {
 			outputCSVFilesystem(results)
 		}
 	} else if len(*repoToScanFlag) != 0 {

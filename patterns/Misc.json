@@ -2,12 +2,7 @@
   {
     "description" : "AWS access key",
     "secretType" : "fileContentRegex",
-    "value": "^[A-Za-z0-9/+-]{40}==$"
-  },
-  {
-    "description" : "AWS access ",
-    "secretType" : "fileContentRegex",
-    "value": "^[A-Za-z0-9/+-]{40}==$"
+    "value": "\\b[=:]+[\"]?[A-Za-z0-9\/+-]{40}\\b"
   },
   {
     "description": "Network traffic capture file",
@@ -124,16 +119,6 @@
     "secretType": "secretFilenameRegex",
     "value": "knife[^ ]*rb",
     "description": "Chef Knife configuration file"
-  },
- {
-    "secretType": "fileContentRegex",
-    "description": "Maybe a username",
-    "value": "user[^ ]*"
-  },
-  {
-    "description": "admin account?",
-    "secretType": "fileContentRegex",
-    "value": "administrator[^ ]*"
   },
   {
     "description": "Github Dev API key",

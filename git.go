@@ -84,7 +84,7 @@ func searchBlobContents(contents []byte) (bool, Pattern){
 		}
 	}
 	*/
-	for _, pattern := range secretFileNameRegexes {
+	for _, pattern := range fileContentRegexes{
 		if pattern.Regex.Match(contents){
 			return true, pattern
 		}
