@@ -26,6 +26,7 @@ type Match struct {
 	CommitIds   []string
 	Description string
 	Value string
+    LineMatched string
 }
 
 type FileStruct struct {
@@ -49,34 +50,34 @@ var fileContentLiterals = []Pattern{}
 var fileContentRegexes = []Pattern{}
 
 var ignoreExts = []string{".dll", ".nupkg"}
-func searchThroughFile(path string) (bool, Pattern, error){
+func searchThroughFile(path string) (bool, Pattern, string, error){
     fi, err := os.Stat(path)
     if err != nil {
-        return false, Pattern{}, err
+        return false, Pattern{}, "", err
     }
     ext := filepath.Ext(path)
     for _, ignore := range ignoreExts{
         if ext == ignore{
-            return false, Pattern{}, err
+            return false, Pattern{}, "", err
         }
     }
     if fi.IsDir() || strings.Contains(path, ".git"){
-        return false, Pattern{}, err
+        return false, Pattern{}, "", err
     }
     f, err := ioutil.ReadFile(path)
     if err != nil{
-        return false, Pattern{}, err
+        return false, Pattern{}, "", err
     }
 
     lines := bytes.Split(f, []byte("\n"))
     for _, pattern := range fileContentRegexes{
         for _, line := range lines{
             if pattern.Regex.Match(line){
-                return true, pattern, nil
+                return true, pattern, string(line), nil
             }
         }
         }
-    return false, Pattern{}, nil
+    return false, Pattern{}, "", nil
 }
 func initializePatterns(path string, info os.FileInfo, _ error) error {
 	if !info.IsDir() {
@@ -120,12 +121,12 @@ func GetAllFilesInDirectory(dir string) ([]FileStruct, error) {
 	return fileList, nil
 }
 
-func appendFilesystemMatch(pattern Pattern, filestruct FileStruct, table map[string]*Match) {
+func appendFilesystemMatch(pattern Pattern, filestruct FileStruct, lineMatched string, table map[string]*Match) {
 	name := filestruct.Filename
 	_, exists := table[name]
 	if !exists {
 		table[name] = &Match{filestruct.Filename, filestruct.Path,
-			nil,pattern.Description, pattern.Value}
+			nil,pattern.Description, pattern.Value, lineMatched}
 		fmt.Println(fmt.Sprintf("Found match %s: %s %s", pattern.Description, filestruct.Path, pattern.Value))
 	}
 }
@@ -142,9 +143,10 @@ func appendGitMatch(pattern Pattern, filename GitFile, table map[string]*Match) 
 	if exists {
 		table[path].CommitIds = append(table[path].CommitIds, filename.CommitId)
 	} else {
+        //TODO: Line matched
 		table[path] = &Match{filename.Name, path,
 							 []string{filename.CommitId}, pattern.Description,
-			pattern.Value}
+			pattern.Value, ""}
 		fmt.Println(fmt.Sprintf("Found match %s %s %s %s", pattern.Description,
 			path, filename.RepoUrl, pattern.Value))
 	}
@@ -183,37 +185,26 @@ func gitSecretFilenameRegexSearch(files []GitFile) []*Match {
 	return results
 }
 
-func filesystemSecretFilenameLiteralSearch(files []FileStruct) []*Match {
-	var table = make(map[string]*Match)
+func filesystemSecretFilenameLiteralSearch(files []FileStruct, table map[string]*Match) {
 	for _, pattern := range secretFileNameLiterals {
 		for _, filename := range files {
 			if strings.Contains(filename.Filename, pattern.Value) {
-				appendFilesystemMatch(pattern, filename, table)
+				appendFilesystemMatch(pattern, filename, "", table)
 			}
 		}
 	}
-	var results []*Match
-	for _, values := range table {
-		results = append(results, values)
-	}
-	return results
+
 }
 
-func filesystemSecretFilenameRegexSearch(files []FileStruct) []*Match{
-	var table = make(map[string]*Match)
+func filesystemSecretFilenameRegexSearch(files []FileStruct, table map[string]*Match){
 	for _, filestruct := range files {
 		for _, pattern := range secretFileNameRegexes {
 			if pattern.Regex.MatchString(filestruct.Filename) {
-				appendFilesystemMatch(pattern, filestruct, table)
+				appendFilesystemMatch(pattern, filestruct, "", table)
 				break
 			}
 		}
 	}
-	var results []*Match
-	for _, values := range table {
-		results = append(results, values)
-	}
-	return results
 }
 
 func initalize() {
@@ -238,10 +229,21 @@ func outputCSV(filename string, records [][]string) {
 	defer file.Close()
 }
 
+func truncateString(str string, num int) string {
+    temp := str
+    if len(str) > num {
+        if num > 3 {
+            num -= 3
+        }
+        temp = str[0:num] + "..."
+    }
+    return temp
+}
 func outputCSVFilesystem(matches []*Match){
-	records := [][]string{{"Filename", "Description", "Filepath", "CommitID"}}
+	records := [][]string{{"Filename", "Description", "Filepath", "LineMatched"}}
 	for _, match := range matches {
-		records = append(records, []string{match.Filename, match.Description, match.Filepath})
+		records = append(records, []string{match.Filename, match.Description,
+            match.Filepath, truncateString(match.LineMatched, 160)})
 	}
 	outputCSV(*outputCSVFlag, records)
 }
@@ -255,19 +257,13 @@ func outputCSVGitRepo(matches []*Match){
 	outputCSV(*outputCSVFlag, records)
 }
 
-func searchFileContents(files []FileStruct) []*Match{
-        var table = make(map[string]*Match)
+func searchFileContents(files []FileStruct, table map[string]*Match){
         for _, f := range files{
-            match, p, err :=searchThroughFile(f.Path)
+            match, p, line, err :=searchThroughFile(f.Path)
             if err == nil && match{
-                appendFilesystemMatch(p,f,table)
+                appendFilesystemMatch(p,f, line,table)
             }
         }
-        var results []*Match
-        for _, values := range table {
-            results = append(results, values)
-        }
-        return results
 }
 
 func main() {
@@ -279,12 +275,17 @@ func main() {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
-		results := filesystemSecretFilenameLiteralSearch(files)
-		results = append(results, filesystemSecretFilenameRegexSearch(files)...)
-        if *fileNamesOnlyFlag{
-            results = append(results, searchFileContents(files)...)
+        var table = make(map[string]*Match)
+		filesystemSecretFilenameLiteralSearch(files, table)
+		filesystemSecretFilenameRegexSearch(files,table)
+        if !*fileNamesOnlyFlag{
+            searchFileContents(files, table)
         }
         if len(*outputCSVFlag) != 0 {
+            var results []*Match
+            for _, values := range table {
+                results = append(results, values)
+            }
 			outputCSVFilesystem(results)
 		}
 	} else if len(*repoToScanFlag) != 0 {
