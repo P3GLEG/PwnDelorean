@@ -2,132 +2,140 @@
   {
     "description" : "AWS access key",
     "secretType" : "fileContentRegex",
-    "value": "\\b[A-Za-z0-9\/+-]{40}\\b"
+    "value": "\\b[A-Za-z0-9\/+-]{40}\\b",
+    "highFalsePositive": true
   },
   {
     "description": "Network traffic capture file",
     "secretType": "secretFilenameLiteral",
-    "value": ".pcap"
+    "value": ".pcap",
+    "highFalsePositive": false
   },
   {
     "description": "Pidgin chat client account configuration file",
     "secretType": "secretFilenameRegex",
-    "value": "accounts[\\s\\S]*.xml"
+    "value": "accounts[\\s\\S]*.xml",
+    "highFalsePositive": false
   },
   {
     "description": "Wordpress configuration file",
     "secretType": "secretFilenameRegex",
-    "value": "wp-config[\\s\\S]*.php"
+    "value": "wp-config[\\s\\S]*.php",
+    "highFalsePositive": true
   },
   {
     "description": "Hexchat/XChat IRC client server list configuration file",
     "secretType": "secretFilenameRegex",
-    "value": ".?xchat2[\\s\\S]*.conf"
+    "value": ".?xchat2[\\s\\S]*.conf",
+    "highFalsePositive": false
 
-  },
-  {
-    "description": "Recon-ng web reconnaissance framework API key database",
-    "secretType": "secretFilenameRegex",
-    "value": ".?recon-ng[\\s\\S]*.db"
   },
   {
     "description": "S3cmd configuration file",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": false,
     "value": ".s3cfg"
   },
   {
     "description": "T command-line Twitter client configuration file",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": false,
     "value": ".trc"
   },
   {
     "description": "OpenVPN client configuration file",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": false,
     "value": ".ovpn"
   },
   {
     "description": "Ruby On Rails secret token configuration file",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": false,
     "value": "secret_token"
   },
   {
     "description": "OmniAuth configuration file",
-    "value": "omniauth",
+    "value": ".omniauth",
+    "highFalsePositive": false,
     "secretType": "secretFilenameLiteral"
   },
   {
     "description": "Carrierwave configuration file",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": false,
     "value": "carrierwave"
   },
   {
     "description": "Django configuration file",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": false,
     "value": "settings.py"
-  },
-  {
-    "description": "PHP configuration file",
-    "secretType": "secretFilenameRegex",
-    "value": ".?config[\\s\\S]*.php"
   },
   {
     "description": "Client SSH Config",
     "secretType": "secretFilenameRegex",
+    "highFalsePositive": false,
     "value": ".?ssh_config[\\s\\S]*"
   },
   {
     "description": "Server SSH Config",
     "secretType": "secretFilenameRegex",
+    "highFalsePositive": false,
     "value": ".?sshd_config[\\s\\S]*"
   },
   {
     "description": "KeePass password manager database file",
     "secretType": "secretFilenameLiteral",
-    "value": "kdb"
+    "highFalsePositive": false,
+    "value": ".kdb"
   },
   {
     "description": "Contains word: backup",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": true,
     "value": ".backup"
   },
   {
     "description": "Contains word: dump",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": true,
     "value": ".dump"
   },
   {
     "description": "Jenkins publish over SSH plugin file",
     "secretType": "secretFilenameRegex",
+    "highFalsePositive": false,
     "value": "jenkins.plugins.publish_over_ssh[^ ]*.xml"
   },
   {
     "description": "Potential MediaWiki configuration file",
     "secretType": "secretFilenameRegex",
+    "highFalsePositive": true,
     "value": "LocalSettings[^ ]*php"
   },
   {
     "description": "Rubygems credentials file",
     "secretType": "secretFilenameRegex",
+    "highFalsePositive": false,
     "value": "\\A\\.?gem/credentials\\z"
   },
   {
     "description": "SSH file",
     "secretType": "secretFilenameLiteral",
+    "highFalsePositive": false,
     "value": ".ssh"
-  },
-  {
-    "secretType": "secretFilenameRegex",
-    "value": "knife[^ ]*rb",
-    "description": "Chef Knife configuration file"
   },
   {
     "description": "Github Dev API key",
     "secretType": "fileContentRegex",
+    "highFalsePositive": false,
     "value": "jekyll_github_token[^ ]*"
   },
   {
     "description": "DHCP server configs",
     "secretType": "secretFilenameRegex",
+    "highFalsePositive": false,
     "value": "dhcpd[^ ]*.conf"
   }
 ]

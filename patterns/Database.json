@@ -2,37 +2,43 @@
     {
       "description": "Database file",
       "secretType": "secretFilenameLiteral",
-      "value":".mdf"
+      "value":".mdf",
+      "highFalsePositive": true
     },
     {
       "description": "Database file",
       "secretType": "secretFilenameLiteral",
-      "value": ".sdf"
+      "value": ".sdf",
+      "highFalsePositive": true
     },
     {
       "description": "Database file",
       "secretType": "secretFilenameLiteral",
-      "value": ".sql"
+      "value": ".sql",
+      "highFalsePositive": true
     },
     {
       "description": "Database file",
       "secretType": "secretFilenameLiteral",
-      "value": ".sqlite"
+      "value": ".sqlite",
+      "highFalsePositive": true
     },
     {
       "description": "MySQL client command history file",
       "secretType": "secretFilenameRegex",
-      "value": "^[\\s\\S]*mysql_history"
+      "value": "^[\\s\\S]*mysql_history",
+      "highFalsePositive": true
     },
     {
       "description": "PostgreSQL client command history file",
       "secretType": "secretFilenameRegex",
-      "value": "^[\\s\\S]*psql_history"
-
+      "value": "^[\\s\\S]*psql_history",
+      "highFalsePositive": true
     },
     {
       "description": "Ruby On Rails database configuration file",
       "secretType": "secretFilenameRegex",
-      "value":"^database[\\s\\S]*.yml"
+      "value":"^database[\\s\\S]*.yml",
+      "highFalsePositive": false
     }
 ]

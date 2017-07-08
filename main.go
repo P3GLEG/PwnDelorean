@@ -15,6 +15,7 @@ type Pattern struct {
 	Description string `json:description`
 	SecretType  string  `json:type`
 	Value       string       `json:value`
+	HighFalsePositive bool `json:highFalsePositive`
 	Regex       *regexp.Regexp
 }
 
@@ -36,6 +37,8 @@ var fileNamesOnlyFlag = flag.Bool("fileNamesOnly", false,
 var organizationFlag= flag.String("organization", "", "Search all of an Organizations repos")
 var ignoreForkRepos = flag.Bool("ignoreForkedRepos", false,
 	"Ignore any Organization repos that are forked")
+var ignoreHighFalsePositivePatterns = flag.Bool("ignoreHighFalsePositives", false,
+	"Ignore patterns that cause a lot of false findings")
 
 var secretFileNameLiterals = []Pattern{}
 var secretFileNameRegexes = []Pattern{}
@@ -59,20 +62,24 @@ func initializePatterns(path string, info os.FileInfo, _ error) error {
 		var data []Pattern
 		json.Unmarshal(file, &data)
 		for _, pattern := range data {
-			switch pattern.SecretType {
-			case "secretFilenameLiteral":
-				secretFileNameLiterals = append(secretFileNameLiterals, pattern)
-			case "secretFilenameRegex":
-				pattern.Regex = regexp.MustCompile(pattern.Value)
-				secretFileNameRegexes = append(secretFileNameRegexes, pattern)
-			case "fileContentLiteral":
-				fileContentLiterals = append(fileContentLiterals, pattern)
-			case "fileContentRegex":
-				pattern.Regex = regexp.MustCompile(pattern.Value)
-				fileContentRegexes = append(fileContentRegexes, pattern)
-			default:
-				fmt.Println("Unable to read " + pattern.Description)
+			if *ignoreHighFalsePositivePatterns && pattern.HighFalsePositive{
+				continue
+				fmt.Println("Ignoring " + pattern.Value)
 			}
+			switch pattern.SecretType {
+				case "secretFilenameLiteral":
+					secretFileNameLiterals = append(secretFileNameLiterals, pattern)
+				case "secretFilenameRegex":
+					pattern.Regex = regexp.MustCompile(pattern.Value)
+					secretFileNameRegexes = append(secretFileNameRegexes, pattern)
+				case "fileContentLiteral":
+					fileContentLiterals = append(fileContentLiterals, pattern)
+				case "fileContentRegex":
+					pattern.Regex = regexp.MustCompile(pattern.Value)
+					fileContentRegexes = append(fileContentRegexes, pattern)
+				default:
+					fmt.Println("Unable to read " + pattern.Description)
+				}
 		}
 	}
 	return nil
