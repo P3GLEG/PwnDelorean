@@ -8,9 +8,7 @@ import (
 	"encoding/json"
 	"flag"
 	"regexp"
-	"strings"
 	"encoding/csv"
-    "bytes"
 )
 
 type Pattern struct {
@@ -29,11 +27,6 @@ type Match struct {
     LineMatched string
 }
 
-type FileStruct struct {
-	Filename string
-	Path string
-}
-
 
 var dirToScanFlag = flag.String("directory", "", "Directory to scan")
 var repoToScanFlag = flag.String("url", "", "Git Repo URL to scan")
@@ -49,36 +42,13 @@ var secretFileNameRegexes = []Pattern{}
 var fileContentLiterals = []Pattern{}
 var fileContentRegexes = []Pattern{}
 
-var ignoreExts = []string{".dll", ".nupkg"}
-func searchThroughFile(path string) (bool, Pattern, string, error){
-    fi, err := os.Stat(path)
-    if err != nil {
-        return false, Pattern{}, "", err
-    }
-    ext := filepath.Ext(path)
-    for _, ignore := range ignoreExts{
-        if ext == ignore{
-            return false, Pattern{}, "", err
-        }
-    }
-    if fi.IsDir() || strings.Contains(path, ".git"){
-        return false, Pattern{}, "", err
-    }
-    f, err := ioutil.ReadFile(path)
-    if err != nil{
-        return false, Pattern{}, "", err
-    }
-
-    lines := bytes.Split(f, []byte("\n"))
-    for _, pattern := range fileContentRegexes{
-        for _, line := range lines{
-            if pattern.Regex.Match(line){
-                return true, pattern, string(line), nil
-            }
-        }
-        }
-    return false, Pattern{}, "", nil
+func initialize() {
+	err := filepath.Walk("./patterns", initializePatterns)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
+
 func initializePatterns(path string, info os.FileInfo, _ error) error {
 	if !info.IsDir() {
 		file, e := ioutil.ReadFile(path)
@@ -108,112 +78,6 @@ func initializePatterns(path string, info os.FileInfo, _ error) error {
 	return nil
 }
 
-
-func GetAllFilesInDirectory(dir string) ([]FileStruct, error) {
-	fileList := []FileStruct{}
-	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		fileList = append(fileList, FileStruct{f.Name(), path})
-		return nil
-	})
-	if err != nil{
-		return nil, err
-	}
-	return fileList, nil
-}
-
-func appendFilesystemMatch(pattern Pattern, filestruct FileStruct, lineMatched string, table map[string]*Match) {
-	name := filestruct.Filename
-	_, exists := table[name]
-	if !exists {
-		table[name] = &Match{filestruct.Filename, filestruct.Path,
-			nil,pattern.Description, pattern.Value, lineMatched}
-		fmt.Println(fmt.Sprintf("Found match %s: %s %s", pattern.Description, filestruct.Path, pattern.Value))
-	}
-}
-func appendGitMatch(pattern Pattern, filename GitFile, table map[string]*Match) {
-	//You can't assume a file hasn't moved directories in history
-	// which is why you use the filepath + filename for uniqueness
-	path := filename.Filepath
-	if len(path) == 0 {
-		path = "/" + filename.Name
-	} else {
-		path += filename.Name
-	}
-	_, exists := table[path]
-	if exists {
-		table[path].CommitIds = append(table[path].CommitIds, filename.CommitId)
-	} else {
-        //TODO: Line matched
-		table[path] = &Match{filename.Name, path,
-							 []string{filename.CommitId}, pattern.Description,
-			pattern.Value, ""}
-		fmt.Println(fmt.Sprintf("Found match %s %s %s %s", pattern.Description,
-			path, filename.RepoUrl, pattern.Value))
-	}
-}
-
-func gitSecretFilenameLiteralSearch(files []GitFile) []*Match {
-	var table = make(map[string]*Match)
-	for _, pattern := range secretFileNameLiterals {
-		for _, filename := range files {
-			if strings.Contains(filename.Name, pattern.Value) {
-				appendGitMatch(pattern, filename, table)
-			}
-		}
-	}
-	var results []*Match
-	for _, values := range table {
-		results = append(results, values)
-	}
-	return results
-}
-
-func gitSecretFilenameRegexSearch(files []GitFile) []*Match {
-	var table = make(map[string]*Match)
-	for _, filename := range files {
-		for _, pattern := range secretFileNameRegexes {
-			if pattern.Regex.MatchString(filename.Name) {
-				appendGitMatch(pattern, filename, table)
-				break
-			}
-		}
-	}
-	var results []*Match
-	for _, values := range table {
-		results = append(results, values)
-	}
-	return results
-}
-
-func filesystemSecretFilenameLiteralSearch(files []FileStruct, table map[string]*Match) {
-	for _, pattern := range secretFileNameLiterals {
-		for _, filename := range files {
-			if strings.Contains(filename.Filename, pattern.Value) {
-				appendFilesystemMatch(pattern, filename, "", table)
-			}
-		}
-	}
-
-}
-
-func filesystemSecretFilenameRegexSearch(files []FileStruct, table map[string]*Match){
-	for _, filestruct := range files {
-		for _, pattern := range secretFileNameRegexes {
-			if pattern.Regex.MatchString(filestruct.Filename) {
-				appendFilesystemMatch(pattern, filestruct, "", table)
-				break
-			}
-		}
-	}
-}
-
-func initalize() {
-	err := filepath.Walk("./patterns", initializePatterns)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
 func outputCSV(filename string, records [][]string) {
 	file, err := os.Create(filename)
 	if err != nil{
@@ -239,83 +103,16 @@ func truncateString(str string, num int) string {
     }
     return temp
 }
-func outputCSVFilesystem(matches []*Match){
-	records := [][]string{{"Filename", "Description", "Filepath", "LineMatched"}}
-	for _, match := range matches {
-		records = append(records, []string{match.Filename, match.Description,
-            match.Filepath, truncateString(match.LineMatched, 160)})
-	}
-	outputCSV(*outputCSVFlag, records)
-}
-
-func outputCSVGitRepo(matches []*Match){
-	records := [][]string{{"Filename", "Description", "Filepath", "CommitID", "Value"}}
-	for _, match := range matches {
-		records = append(records, []string{match.Filename, match.Description, match.Filepath,
-										   strings.Join(match.CommitIds, "|"), match.Value})
-	}
-	outputCSV(*outputCSVFlag, records)
-}
-
-func searchFileContents(files []FileStruct, table map[string]*Match){
-        for _, f := range files{
-            match, p, line, err :=searchThroughFile(f.Path)
-            if err == nil && match{
-                appendFilesystemMatch(p,f, line,table)
-            }
-        }
-}
 
 func main() {
-	initalize()
+	initialize()
 	flag.Parse()
 	if len(*dirToScanFlag) != 0 {
-		files, err := GetAllFilesInDirectory(*dirToScanFlag)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(-1)
-		}
-        var table = make(map[string]*Match)
-		filesystemSecretFilenameLiteralSearch(files, table)
-		filesystemSecretFilenameRegexSearch(files,table)
-        if !*fileNamesOnlyFlag{
-            searchFileContents(files, table)
-        }
-        if len(*outputCSVFlag) != 0 {
-            var results []*Match
-            for _, values := range table {
-                results = append(results, values)
-            }
-			outputCSVFilesystem(results)
-		}
+		startFileSystemScan()
 	} else if len(*repoToScanFlag) != 0 {
-		results, err := gitRepoSearch(*repoToScanFlag)
-		if err != nil{
-			fmt.Println(err)
-		}
-		if len(*outputCSVFlag) != 0 {
-			outputCSVGitRepo(results)
-		}
+		startGitRepoScan()
 	} else if len(*organizationFlag) != 0{
-		var results = []*Match{}
-		urls, err := getAllOrganizationsRepoUrls(*organizationFlag)
-		if err!= nil {
-			fmt.Println(err)
-			os.Exit(-1)
-		}
-		matchChan := make(chan []*Match, len(urls))
-		for _, url := range urls{
-			go getOrgRepo(url, matchChan)
-		}
-		for i:= 0; i < len(urls); i++{
-			select {
-			case matches := <-matchChan:
-				results = append(results, matches...)
-			}
-		}
-		if len(*outputCSVFlag) != 0 {
-			outputCSVGitRepo(results)
-		}
+		startGitOrganizationScan()
 	} else {
 		flag.Usage()
 		os.Exit(-1)

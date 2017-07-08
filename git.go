@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"fmt"
+	"strings"
 )
 
 type GitFile struct {
@@ -188,3 +189,98 @@ func GetRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
 
 
 
+func appendGitMatch(pattern Pattern, filename GitFile, table map[string]*Match) {
+	//You can't assume a file hasn't moved directories in history
+	// which is why you use the filepath + filename for uniqueness
+	path := filename.Filepath
+	if len(path) == 0 {
+		path = "/" + filename.Name
+	} else {
+		path += filename.Name
+	}
+	_, exists := table[path]
+	if exists {
+		table[path].CommitIds = append(table[path].CommitIds, filename.CommitId)
+	} else {
+        //TODO: Line matched
+		table[path] = &Match{filename.Name, path,
+							 []string{filename.CommitId}, pattern.Description,
+			pattern.Value, ""}
+		fmt.Println(fmt.Sprintf("Found match %s %s %s %s", pattern.Description,
+			path, filename.RepoUrl, pattern.Value))
+	}
+}
+
+func gitSecretFilenameLiteralSearch(files []GitFile) []*Match {
+	var table = make(map[string]*Match)
+	for _, pattern := range secretFileNameLiterals {
+		for _, filename := range files {
+			if strings.Contains(filename.Name, pattern.Value) {
+				appendGitMatch(pattern, filename, table)
+			}
+		}
+	}
+	var results []*Match
+	for _, values := range table {
+		results = append(results, values)
+	}
+	return results
+}
+
+func gitSecretFilenameRegexSearch(files []GitFile) []*Match {
+	var table = make(map[string]*Match)
+	for _, filename := range files {
+		for _, pattern := range secretFileNameRegexes {
+			if pattern.Regex.MatchString(filename.Name) {
+				appendGitMatch(pattern, filename, table)
+				break
+			}
+		}
+	}
+	var results []*Match
+	for _, values := range table {
+		results = append(results, values)
+	}
+	return results
+}
+
+func outputCSVGitRepo(matches []*Match){
+	records := [][]string{{"Filename", "Description", "Filepath", "CommitID", "Value"}}
+	for _, match := range matches {
+		records = append(records, []string{match.Filename, match.Description, match.Filepath,
+										   strings.Join(match.CommitIds, "|"), match.Value})
+	}
+	outputCSV(*outputCSVFlag, records)
+}
+
+func startGitRepoScan(){
+	results, err := gitRepoSearch(*repoToScanFlag)
+		if err != nil{
+			fmt.Println(err)
+		}
+		if len(*outputCSVFlag) != 0 {
+			outputCSVGitRepo(results)
+		}
+}
+
+func startGitOrganizationScan(){
+	var results = []*Match{}
+		urls, err := getAllOrganizationsRepoUrls(*organizationFlag)
+		if err!= nil {
+			fmt.Println(err)
+			os.Exit(-1)
+		}
+		matchChan := make(chan []*Match, len(urls))
+		for _, url := range urls{
+			go getOrgRepo(url, matchChan)
+		}
+		for i:= 0; i < len(urls); i++{
+			select {
+			case matches := <-matchChan:
+				results = append(results, matches...)
+			}
+		}
+		if len(*outputCSVFlag) != 0 {
+			outputCSVGitRepo(results)
+		}
+}
