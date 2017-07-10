@@ -9,6 +9,9 @@ import (
 	"net/http"
 	"fmt"
 	"strings"
+	"bytes"
+	"github.com/fatih/color"
+	"strconv"
 )
 
 type GitFile struct {
@@ -18,9 +21,10 @@ type GitFile struct {
 	RepoUrl string
 }
 
-const gitHubApiVersion = "application/vnd.github.v3+json"
+const GITHUB_API_VERSION = "application/vnd.github.v3+json"
 const INVALID_PLAINTEXT_CREDS = -10
 const INVALID_SSH_CREDS= -11
+
 
 func gitHubPerformRequest(urlString string) ([]string, error) {
 	var urls = []string{}
@@ -29,7 +33,7 @@ func gitHubPerformRequest(urlString string) ([]string, error) {
 	if err != nil {
 		return urls, err
 	}
-	req.Header.Set("Accept", gitHubApiVersion)
+	req.Header.Set("Accept", GITHUB_API_VERSION)
 	//TODO: Add auth here
 	//req.SetBasicAuth(Github.Username, Github.AccessToken)
 	resp, err := client.Do(req)
@@ -110,7 +114,18 @@ func certificateCheckCallback(cert *git.Certificate, valid bool, hostname string
 	return 0
 }
 
-func searchBlobContents(contents []byte) (bool, Pattern){
+func searchBlobContents(contents []byte) (bool, Pattern, string, int){
+	lines := bytes.Split(contents, []byte("\n"))
+	for _, pattern := range fileContentRegexes {
+		lineNumb := 0
+		for _, line := range lines {
+			lineNumb++
+			if pattern.Regex.Match(line) {
+				return true, pattern, string(line), lineNumb
+			}
+		}
+	}
+    return false, Pattern{}, "", -1
 	/*
 	This is matching on things it shouldn't
 	for _, pattern := range fileContentLiterals{
@@ -121,12 +136,6 @@ func searchBlobContents(contents []byte) (bool, Pattern){
 		}
 	}
 	*/
-	for _, pattern := range fileContentRegexes{
-		if pattern.Regex.Match(contents){
-			return true, pattern
-		}
-	}
-	return false, Pattern{}
 }
 
 func gitRepoSearch(repoUrl string) ([]*Match, error){
@@ -144,7 +153,7 @@ func gitRepoSearch(repoUrl string) ([]*Match, error){
 func getOrgRepo(url string, matchChan chan[]*Match){
 	matches, err := gitRepoSearch(url)
 	if err != nil{
-		fmt.Println(err)
+		color.Red(err.Error())
 	}
 	matchChan <- matches
 }
@@ -219,12 +228,12 @@ func getRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
 			if te.Type == git.ObjectBlob && te.Filemode == git.FilemodeBlob{
 				gitFile := GitFile{te.Name,
 					td, commit.Id().String(), repoUrl}
-				if !*fileNamesOnlyFlag {
+				if !*fileNamesOnlyFlag && checkIfInsideIgnoredDirectory(td){
 					blob, err := repo.LookupBlob(te.Id)
 					if err == nil {
-						match, pattern := searchBlobContents(blob.Contents())
+						match, pattern, line, lineNum := searchBlobContents(blob.Contents())
 						if match {
-							appendGitMatch(pattern, gitFile, table)
+							appendGitMatch(pattern, gitFile, line, lineNum, table)
 						}
 					}
 				}
@@ -241,8 +250,8 @@ func getRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
 }
 
 
-
-func appendGitMatch(pattern Pattern, filename GitFile, table map[string]*Match) {
+func appendGitMatch(pattern Pattern, filename GitFile,
+	lineMatched string, lineNumb int, table map[string]*Match) {
 	//You can't assume a file hasn't moved directories in history
 	// which is why you use the filepath + filename for uniqueness
 	path := filename.Filepath
@@ -255,12 +264,16 @@ func appendGitMatch(pattern Pattern, filename GitFile, table map[string]*Match) 
 	if exists {
 		table[path].CommitIds = append(table[path].CommitIds, filename.CommitId)
 	} else {
-        //TODO: Line matched
 		table[path] = &Match{filename.Name, path,
 							 []string{filename.CommitId}, pattern.Description,
-			pattern.Value, ""}
-		fmt.Println(fmt.Sprintf("Found match %s %s %s %s", pattern.Description,
-			path, filename.RepoUrl, pattern.Value))
+			pattern.Value, lineMatched, lineNumb}
+
+		fmt.Print(color.BlueString("Found match %s %s ", pattern.Description, pattern.Value))
+		if lineNumb == NO_LINE_NUMBER_APPLICABLE{
+			color.Green("%s %s", path, filename.RepoUrl)
+		} else{
+			color.Green("%s:%d %s", path, lineNumb, filename.RepoUrl)
+		}
 	}
 }
 
@@ -269,7 +282,7 @@ func gitSecretFilenameLiteralSearch(files []GitFile) []*Match {
 	for _, pattern := range secretFileNameLiterals {
 		for _, filename := range files {
 			if strings.Contains(filename.Name, pattern.Value) {
-				appendGitMatch(pattern, filename, table)
+				appendGitMatch(pattern, filename, IS_FILENAME_MATCH, NO_LINE_NUMBER_APPLICABLE, table)
 			}
 		}
 	}
@@ -285,7 +298,7 @@ func gitSecretFilenameRegexSearch(files []GitFile) []*Match {
 	for _, filename := range files {
 		for _, pattern := range secretFileNameRegexes {
 			if pattern.Regex.MatchString(filename.Name) {
-				appendGitMatch(pattern, filename, table)
+				appendGitMatch(pattern, filename, IS_FILENAME_MATCH, NO_LINE_NUMBER_APPLICABLE, table)
 				break
 			}
 		}
@@ -298,10 +311,11 @@ func gitSecretFilenameRegexSearch(files []GitFile) []*Match {
 }
 
 func outputCSVGitRepo(matches []*Match){
-	records := [][]string{{"Filename", "Description", "Filepath", "CommitID", "Value"}}
+	records := [][]string{{"Filename", "Description", "Filepath", "CommitID", "Value", "Line Number"}}
 	for _, match := range matches {
 		records = append(records, []string{match.Filename, match.Description, match.Filepath,
-										   strings.Join(match.CommitIds, "|"), match.Value})
+										   strings.Join(match.CommitIds, "|"),
+			match.Value, strconv.Itoa(match.LineNumber)})
 	}
 	outputCSV(*outputCSVFlag, records)
 }
@@ -309,7 +323,7 @@ func outputCSVGitRepo(matches []*Match){
 func startGitRepoScan(){
 	results, err := gitRepoSearch(*repoToScanFlag)
 		if err != nil{
-			fmt.Println(err)
+			color.Red(err.Error())
 		}
 		if len(*outputCSVFlag) != 0 {
 			outputCSVGitRepo(results)
@@ -320,7 +334,7 @@ func startGitOrganizationScan(){
 	var results = []*Match{}
 		urls, err := getAllOrganizationsRepoUrls(*organizationFlag)
 		if err!= nil {
-			fmt.Println(err)
+			color.Red(err.Error())
 			os.Exit(-1)
 		}
 		matchChan := make(chan []*Match, len(urls))
