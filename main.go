@@ -29,16 +29,19 @@ type Match struct {
 }
 
 
-var dirToScanFlag = flag.String("directory", "", "Directory to scan")
+var dirToScanFlag = flag.String("directory", "", "Filesystem location to scan")
 var repoToScanFlag = flag.String("url", "", "Git Repo URL to scan")
-var outputCSVFlag = flag.String("csv", "", "Output in CSV Format")
+var outputCSVFlag = flag.String("csv", "", "Output CSV file with results to filelocation")
 var fileNamesOnlyFlag = flag.Bool("fileNamesOnly", false,
-	"Disable searching through File for speed increase")
+	"Disable searching through file contents for speed increase")
 var organizationFlag= flag.String("organization", "", "Search all of an Organizations repos")
 var ignoreForkRepos = flag.Bool("ignoreForkedRepos", false,
 	"Ignore any Organization repos that are forked")
 var ignoreHighFalsePositivePatterns = flag.Bool("ignoreHighFalsePositives", false,
 	"Ignore patterns that cause a lot of false findings")
+var useGitCredentials = flag.String("creds", "",
+	"set to 'ssh' or 'plaintext'\nplaintext set environment variables: GIT_USER/GIT_PASS\n" +
+		"ssh set environment variables: GIT_USER/GIT_PRIV_KEY/GIT_PUB_KEY/GIT_PASSPHRASE")
 
 var secretFileNameLiterals = []Pattern{}
 var secretFileNameRegexes = []Pattern{}

@@ -19,6 +19,9 @@ type GitFile struct {
 }
 
 const gitHubApiVersion = "application/vnd.github.v3+json"
+const INVALID_PLAINTEXT_CREDS = -10
+const INVALID_SSH_CREDS= -11
+
 func gitHubPerformRequest(urlString string) ([]string, error) {
 	var urls = []string{}
 	client := &http.Client{}
@@ -74,6 +77,39 @@ func getAllOrganizationsRepoUrls(orgName string) ([]string, error){
 	return urls, err
 }
 
+
+func credentialsCallback(url string, username string, allowedTypes git.CredType) (git.ErrorCode, *git.Cred) {
+	git_user := os.Getenv("GIT_USER")
+	git_pass := os.Getenv("GIT_PASS")
+	git_priv := os.Getenv("GIT_PRIV_KEY")
+	git_pub := os.Getenv("GIT_PUB_KEY")
+	git_passphrase := os.Getenv("GIT_PASSPHRASE")
+	switch *useGitCredentials{
+	case "ssh":
+		if len(git_user) == 0 || len(git_pub) ==0 || len(git_priv) == 0{
+			return git.ErrorCode(INVALID_SSH_CREDS), nil
+		}
+		ret, cred := git.NewCredSshKey(git_user,
+		git_pub,
+		git_priv,
+		git_passphrase)
+		return git.ErrorCode(ret), &cred
+	case "plaintext":
+		if len(git_user) == 0 || len(git_pass) == 0{
+			return git.ErrorCode(INVALID_PLAINTEXT_CREDS), nil
+		}
+		ret, cred := git.NewCredUserpassPlaintext(git_user, git_pass)
+		return git.ErrorCode(ret), &cred
+	default:
+		return git.ErrorCode(-1), nil
+	}
+}
+
+func certificateCheckCallback(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
+	//TODO: Fix lol
+	return 0
+}
+
 func searchBlobContents(contents []byte) (bool, Pattern){
 	/*
 	This is matching on things it shouldn't
@@ -95,7 +131,7 @@ func searchBlobContents(contents []byte) (bool, Pattern){
 
 func gitRepoSearch(repoUrl string) ([]*Match, error){
 	var results = []*Match{}
-	files, matches, err := GetRepoFilenames(repoUrl)
+	files, matches, err := getRepoFilenames(repoUrl)
 	if err != nil {
 			return results, err
 	}
@@ -127,7 +163,7 @@ func searchAllBranches(repo *git.Repository, walk *git.RevWalk) error{
 	return nil
 }
 
-func GetRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
+func getRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
 	var table = make(map[string]*Match)
 	var filenames []GitFile
 	var matches []*Match
@@ -136,9 +172,26 @@ func GetRepoFilenames(repoUrl string) ([]GitFile, []*Match, error){
 		return filenames, matches, err
 	}
 	defer os.RemoveAll(dir)
-	repo, err := git.Clone(repoUrl, dir, &git.CloneOptions{})
+	cloneOptions := &git.CloneOptions{}
+	if len(*useGitCredentials) !=0 {
+		cloneOptions.FetchOptions = &git.FetchOptions{
+			RemoteCallbacks: git.RemoteCallbacks{
+				CredentialsCallback:      credentialsCallback,
+				CertificateCheckCallback: certificateCheckCallback,
+			},
+		}
+	}
+	repo, err := git.Clone(repoUrl, dir, cloneOptions)
 	if err != nil {
-		return filenames, matches, err
+		if err.(*git.GitError).Code == INVALID_PLAINTEXT_CREDS{
+			return filenames, matches,
+				errors.New("Please check your GIT_USER and GIT_PASS Environment variables")
+		} else if len(*useGitCredentials) ==0 {
+			return filenames, matches, errors.New(
+				"-creds flag not in use, the repo may be private or doesn't exist")
+		} else {
+			return filenames, matches, errors.New("Git repo appears to not exist")
+		}
 	}
 	defer repo.Free()
 	head, err := repo.Head()
