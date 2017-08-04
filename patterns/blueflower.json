@@ -1,0 +1,200 @@
+[
+	{
+	"descrption": "bitlocker",
+	"secretType": "secretFilenameLiteral",
+	"value": ".bek",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "bitlocker",
+	"secretType": "secretFilenameLiteral",
+	"value": ".tpm",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "bitlocker",
+	"secretType": "secretFilenameLiteral",
+	"value": ".fve",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "certs",
+	"secretType": "secretFilenameLiteral",
+	"value": ".crt",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "java key store",
+	"secretType": "secretFilenameLiteral",
+	"value": ".jks",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "openssl .key, apple .keychain, etc.",
+	"secretType": "secretFilenameLiteral",
+	"value": ".key",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "passwordsafe",
+	"secretType": "secretFilenameLiteral",
+	"value": ".psafe3",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "PKCS15 tokens",
+	"secretType": "secretFilenameLiteral",
+	"value": ".p15",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "mozilla",
+	"secretType": "secretFilenameLiteral",
+	"value": "cert8.db",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "sql",
+	"secretType": "secretFilenameLiteral",
+	"value": "connect.inc",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "dbman",
+	"secretType": "secretFilenameLiteral",
+	"value": "default.pass",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "apache/nginx",
+	"secretType": "secretFilenameLiteral",
+	"value": "htaccess",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "openssh",
+	"secretType": "secretFilenameLiteral",
+	"value": "id_dsa",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "openssh",
+	"secretType": "secretFilenameLiteral",
+	"value": "id_ecdsa",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "openssh",
+	"secretType": "secretFilenameLiteral",
+	"value": "id_ed25519",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "openssh",
+	"secretType": "secretFilenameLiteral",
+	"value": "id_rsa",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "mozilla",
+	"secretType": "secretFilenameLiteral",
+	"value": "key3.db",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "typo3",
+	"secretType": "secretFilenameLiteral",
+	"value": "localconf",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "wikimedia",
+	"secretType": "secretFilenameLiteral",
+	"value": "localsettings",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "~/.netrc",
+	"secretType": "secretFilenameLiteral",
+	"value": "netrc",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "libpurple otr fingerprints",
+	"secretType": "secretFilenameLiteral",
+	"value": "otr.fingerprints",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "misc",
+	"secretType": "secretFilenameLiteral",
+	"value": "passlist",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "*nix & htpasswd",
+	"secretType": "secretFilenameLiteral",
+	"value": "passwd",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "misc",
+	"secretType": "secretFilenameLiteral",
+	"value": "passwords",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "pgp",
+	"secretType": "secretFilenameLiteral",
+	"value": "pgplog",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "pgp",
+	"secretType": "secretFilenameLiteral",
+	"value": "pgppolicy.xml",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "pgp",
+	"secretType": "secretFilenameLiteral",
+	"value": "pgpprefs.xml",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "gnupg",
+	"secretType": "secretFilenameLiteral",
+	"value": "secring",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "sftp",
+	"secretType": "secretFilenameLiteral",
+	"value": "sftp-config",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "*nix",
+	"secretType": "secretFilenameLiteral",
+	"value": "shadow",
+	"highFalsePositive": true
+	},
+	{
+	"descrption": "freebsd",
+	"secretType": "secretFilenameLiteral",
+	"value": "spwd.bd",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": ".net",
+	"secretType": "secretFilenameLiteral",
+	"value": "users.xml",
+	"highFalsePositive": false
+	},
+	{
+	"descrption": "bitcoin",
+	"secretType": "secretFilenameLiteral",
+	"value": "wallet.dat",
+	"highFalsePositive": false
+	}
+]

@@ -9,6 +9,8 @@ Requires Go runtime, currently using go version 1.8.3
 ## Getting Started
 
 ```bash
+brew install libgit2
+go get
 go build . 
 ./PwnDelorean -url https://github.com/k4ch0w/PwnDelorean.git
 ```
