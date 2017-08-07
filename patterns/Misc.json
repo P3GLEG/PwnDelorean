@@ -137,5 +137,12 @@
     "secretType": "secretFilenameRegex",
     "highFalsePositive": false,
     "value": "dhcpd[^ ]*.conf"
-  }
+  },
+  {
+    "description": "Heroku Environment Variable",
+    "secretType": "fileContentLiteral",
+    "highFalsePositive": false,
+    "value": "heroku config:set"
+  },
+
 ]
