@@ -144,5 +144,10 @@
     "highFalsePositive": false,
     "value": "heroku config:set"
   },
-
+  {
+    "description": "Jupyter Configuration file",
+    "secretType": "secretFilenameRegex",
+    "highFalsePositive": false,
+    "value": "jupyter[^ ]*config[^ ]*.json"
+  }
 ]
