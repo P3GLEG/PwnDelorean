@@ -1,0 +1,38 @@
+[
+    {
+        "highFalsePositive": "false",
+        "value": "(\\n[a-z0-9_\\-]+[:;\\|][a-z0-9_\\-]+){10,}",
+        "description": "Secret",
+        "secretType": "fileContentRegex"
+    },
+    {
+        "highFalsePositive": "false",
+        "value": "(api|secret)key\\s*[\\=]+",
+        "description": "API secret key",
+        "secretType": "fileContentRegex"
+    },
+    {
+        "highFalsePositive": "false",
+        "value": "BEGIN:VCALENDAR",
+        "description": "iCalender",
+        "secretType": "fileContentLiteral"
+    },
+    {
+        "highFalsePositive": "false",
+        "value": "\\s*[a-z0-9\\-_]*secret[key]+\\s*[:=]+\\s*[\"']\\S+[\"']",
+        "description": "secret key",
+        "secretType": "fileContentRegex"
+    },
+    {
+        "highFalsePositive": "false",
+        "value": "^[a-z0-9]+:[a-z0-9]{13}$",
+        "description": "HtPasswds",
+        "secretType": "fileContentRegex"
+    },
+    {
+        "highFalsePositive": "false",
+        "value": "secret\\s*[\\=]+",
+        "description": "Secret finder",
+        "secretType": "fileContentRegex"
+    }
+]
